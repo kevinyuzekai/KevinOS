@@ -334,15 +334,15 @@
           ])
         ]));
         const templates = [
-          { t: 'doc', name: '文字文档', sub: 'Word 风格的富文本编辑', color: ['#2b6cff', '#4f9bff'] },
-          { t: 'sheet', name: '电子表格', sub: '支持公式与函数计算', color: ['#109d58', '#2fbf7a'] },
-          { t: 'slide', name: '演示文稿', sub: '幻灯片编辑与全屏放映', color: ['#e2483d', '#f5732c'] },
-          { t: 'pdf', name: 'PDF 阅读', sub: '打开并查看 PDF 文件', color: ['#8a4bff', '#b07bff'] }
+          { t: 'doc', name: '文字文档', sub: 'Word 风格的富文本编辑', color: ['#2b6cff', '#4f9bff'], icon: '<path d="M6 2h8l4 4v16H6V2zm7 1.5V7h3.5L13 3.5zM8 11h8v1.5H8V11zm0 4h8v1.5H8V15zm0-8h5v1.5H8V7z"/>' },
+          { t: 'sheet', name: '电子表格', sub: '支持公式与函数计算', color: ['#109d58', '#2fbf7a'], icon: '<path d="M4 4h16v16H4V4zm2 3v3h3V7H6zm5 0v3h3V7h-3zm5 0v3h3V7h-3zM6 12v3h3v-3H6zm5 0v3h3v-3h-3zm5 0v3h3v-3h-3z"/>' },
+          { t: 'slide', name: '演示文稿', sub: '幻灯片编辑与全屏放映', color: ['#e2483d', '#f5732c'], icon: '<path d="M3 5h18v11H3V5zm2 2v7h14V7H5zm-2 11h18v1.5H3V18z"/>' },
+          { t: 'pdf', name: 'PDF 阅读', sub: '打开并查看 PDF 文件', color: ['#8a4bff', '#b07bff'], icon: '<path d="M6 2h8l4 4v16H6V2zm7 1.5V7h3.5L13 3.5zM8 11h2v2H8v-2zm3 0h5v1.5h-5V11zm0 3h5v1.5h-5V14z"/>' }
         ];
         const grid = el('div', { class: 'of-home-grid' });
         templates.forEach(tp => {
           const card = el('div', { class: 'of-home-card' }, [
-            el('div', { class: 'of-home-ico', style: { background: `linear-gradient(145deg,${tp.color[0]},${tp.color[1]})` }, html: `<svg viewBox="0 0 24 24">${K.ICONS.office}</svg>` }),
+            el('div', { class: 'of-home-ico', style: { background: `linear-gradient(145deg,${tp.color[0]},${tp.color[1]})` }, html: `<svg viewBox="0 0 24 24">${tp.icon}</svg>` }),
             el('div', { class: 'of-home-ct' }, [el('div', { class: 'of-home-name', text: tp.name }), el('div', { class: 'of-home-sub', text: tp.sub })])
           ]);
           card.addEventListener('click', () => tp.t === 'pdf' ? pickPDF() : newDoc(tp.t));
@@ -378,9 +378,8 @@
         const fbar = el('div', { class: 'of-fbar' }, [fbarRef, el('span', { class: 'of-fx', text: 'fx' }), fbarInput]);
 
         const grid = el('div', { class: 'of-grid' });
-        const wrap = el('div', { class: 'of-sheet', 'data-editor': '1' }, [fbar, grid]);
         const scroll = el('div', { class: 'of-sheet-scroll' }, [grid]);
-        wrap.removeChild(grid); wrap.appendChild(scroll);
+        const wrap = el('div', { class: 'of-sheet', 'data-editor': '1' }, [fbar, scroll]);
 
         function cellAt(c, r) { return sheet.cells[colName(c) + r]; }
         function displayOf(c, r) { const cell = cellAt(c, r); if (!cell) return ''; return cell.v == null ? '' : String(cell.v); }

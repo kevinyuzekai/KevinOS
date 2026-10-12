@@ -71,8 +71,8 @@ html[data-touch="on"] .term { cursor: text; }
 html[data-touch="on"] .term-input { font-size: 16px; } /* 避免 iOS 聚焦时自动缩放 */
 
 /* 触屏：Office 等应用的功能区按钮加大点击区域 */
-html[data-touch="on"] .of-ribbon-btn,
-html[data-touch="on"] .of-tab { min-height: 40px; padding: 0 14px; }
+html[data-touch="on"] .of-rbtn { min-height: 48px; padding: 4px 10px; }
+html[data-touch="on"] .of-tab { height: 38px; }
 
 /* 触屏：防止文本选择干扰拖拽，但允许输入框编辑 */
 html[data-touch="on"] .win-body { -webkit-user-select: none; user-select: none; }
