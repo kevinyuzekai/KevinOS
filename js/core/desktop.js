@@ -198,6 +198,7 @@
 
   function openStartMenu() {
     const m = document.getElementById('start-menu');
+    closeActionCenter(); closeWifiPanel();
     m.hidden = false;
     requestAnimationFrame(() => m.classList.add('open'));
     document.getElementById('start-btn').classList.add('active');
@@ -221,7 +222,7 @@
     const st = K.system.settings;
     const defs = [
       { on: st.theme === 'dark', ico: 'image', t1: '深色模式', t2: st.theme === 'dark' ? '已开启' : '已关闭', act: () => { K.system.setTheme(st.theme === 'dark' ? 'light' : 'dark'); renderActionCenter(); } },
-      { on: true, ico: 'settings', t1: 'Wi-Fi', t2: '已连接 KevinOS-5G', act: () => notify({ title: '网络', body: 'Wi-Fi 已就绪' }) },
+      { on: navigator.onLine, ico: navigator.onLine ? 'wifi' : 'wifi-off', t1: '网络', t2: netTypeLabel(netInfo()), act: () => { closeActionCenter(); openWifiPanel(); } },
       { on: false, ico: 'media', t1: '蓝牙', t2: '未连接', act: () => notify({ title: '蓝牙', body: '正在搜索设备…' }) },
       { on: st.glass, ico: 'about', t1: '透明效果', t2: '亚克力材质', act: () => { st.glass = !st.glass; K.system.applySettings(); renderActionCenter(); } }
     ];
@@ -238,6 +239,7 @@
   }
   function openActionCenter() {
     const a = document.getElementById('action-center');
+    closeWifiPanel();
     a.hidden = false;
     requestAnimationFrame(() => a.classList.add('open'));
     renderActionCenter(); renderNotifs();
@@ -248,6 +250,90 @@
     setTimeout(() => { if (!a.classList.contains('open')) a.hidden = true; }, 300);
   }
   function toggleActionCenter() { document.getElementById('action-center').classList.contains('open') ? closeActionCenter() : openActionCenter(); }
+
+  /* ---------------- Wi-Fi / 网络（读取真实网络信息） ---------------- */
+  function netConn() {
+    return navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
+  }
+  function netInfo() {
+    const c = netConn();
+    return {
+      online: navigator.onLine,
+      type: (c && c.type) || '',
+      effectiveType: (c && c.effectiveType) || '',
+      downlink: c && typeof c.downlink === 'number' ? c.downlink : null,
+      rtt: c && typeof c.rtt === 'number' ? c.rtt : null,
+      saveData: c ? !!c.saveData : null
+    };
+  }
+  const NET_TYPE = { wifi: 'Wi-Fi', ethernet: '以太网', cellular: '蜂窝网络', bluetooth: '蓝牙', wimax: 'WiMAX', none: '无网络', other: '其他', unknown: '未知' };
+  function netTypeLabel(i) {
+    if (!i.online) return '未连接';
+    if (i.type && NET_TYPE[i.type]) return NET_TYPE[i.type];
+    return 'Wi-Fi / 已联网';
+  }
+  function netSpeedLabel(i) {
+    const map = { 'slow-2g': '极慢 (slow-2G)', '2g': '较慢 (2G)', '3g': '一般 (3G)', '4g': '良好 (4G)' };
+    return i.effectiveType ? (map[i.effectiveType] || i.effectiveType.toUpperCase()) : (i.online ? '未提供' : '—');
+  }
+  function renderWifiPanel() {
+    const panel = document.getElementById('wifi-panel');
+    const i = netInfo();
+    panel.classList.toggle('offline', !i.online);
+    document.getElementById('wifi-head-ico').innerHTML = `<svg viewBox="0 0 24 24" class="ico">${K.ICONS[i.online ? 'wifi' : 'wifi-off']}</svg>`;
+    document.getElementById('wifi-head-t1').textContent = netTypeLabel(i);
+    document.getElementById('wifi-head-t2').textContent = i.online
+      ? (i.saveData ? '已连接 · 数据节省模式' : '已连接 · 网络正常')
+      : '离线 · 请检查网络连接';
+
+    const cells = [
+      ['状态', i.online ? '在线' : '离线'],
+      ['连接类型', netTypeLabel(i)],
+      ['网络速率', netSpeedLabel(i)],
+      ['下行带宽', i.downlink != null ? i.downlink + ' <small>Mbps</small>' : '<small>未提供</small>'],
+      ['往返时延', i.rtt != null ? i.rtt + ' <small>ms</small>' : '<small>未提供</small>'],
+      ['数据节省', i.saveData == null ? '<small>未提供</small>' : (i.saveData ? '已开启' : '已关闭')]
+    ];
+    const grid = document.getElementById('wifi-grid');
+    grid.innerHTML = '';
+    cells.forEach(([k, v]) => grid.appendChild(
+      el('div', { class: 'wifi-cell' }, [el('div', { class: 'wc-k', text: k }), el('div', { class: 'wc-v', html: v })])
+    ));
+    document.getElementById('wifi-note').textContent = netConn()
+      ? '以上为浏览器实时上报的真实网络指标。受隐私保护，网页无法获取 Wi-Fi 名称(SSID)与信号强度。'
+      : '当前浏览器未提供 Network Information API（建议使用 Chrome/Edge），仅显示在线状态。受隐私保护，网页无法获取 Wi-Fi 名称与信号强度。';
+  }
+  function updateWifiTray() {
+    const btn = document.getElementById('tray-wifi');
+    if (!btn) return;
+    const i = netInfo();
+    btn.classList.toggle('offline', !i.online);
+    btn.title = i.online ? '网络 · ' + netTypeLabel(i) : '网络 · 离线';
+    if (!document.getElementById('wifi-panel').hidden) renderWifiPanel();
+  }
+  function openWifiPanel() {
+    closeStartMenu(); closeActionCenter(); closeLaunchpad();
+    const p = document.getElementById('wifi-panel');
+    p.hidden = false;
+    renderWifiPanel();
+    requestAnimationFrame(() => p.classList.add('open'));
+    document.getElementById('tray-wifi').classList.add('active');
+  }
+  function closeWifiPanel() {
+    const p = document.getElementById('wifi-panel');
+    if (p.hidden) return;
+    p.classList.remove('open');
+    document.getElementById('tray-wifi').classList.remove('active');
+    setTimeout(() => { if (!p.classList.contains('open')) p.hidden = true; }, 300);
+  }
+  function toggleWifiPanel() { document.getElementById('wifi-panel').classList.contains('open') ? closeWifiPanel() : openWifiPanel(); }
+  function initNetwork() {
+    updateWifiTray();
+    window.addEventListener('online', () => { updateWifiTray(); notify({ title: '网络', body: '已恢复网络连接' }); });
+    window.addEventListener('offline', () => { updateWifiTray(); notify({ title: '网络', body: '网络连接已断开' }); });
+    const c = netConn();
+    if (c && c.addEventListener) c.addEventListener('change', updateWifiTray);
+  }
 
   /* ---------------- 启动台（Launchpad） ---------------- */
   const LP_COLS = 7, LP_ROWS = 3, LP_PER_PAGE = LP_COLS * LP_ROWS;
@@ -307,7 +393,7 @@
     lpPage = next; lpUpdateTrack();
   }
   function openLaunchpad() {
-    closeStartMenu(); closeActionCenter();
+    closeStartMenu(); closeActionCenter(); closeWifiPanel();
     const lp = document.getElementById('launchpad');
     lp.hidden = false; lpPage = 0;
     const s = document.getElementById('lp-search'); s.value = '';
@@ -447,7 +533,7 @@
     // 托盘
     document.getElementById('tray-notif').addEventListener('click', e => { e.stopPropagation(); toggleActionCenter(); });
     document.getElementById('tray-clock').addEventListener('click', e => { e.stopPropagation(); toggleActionCenter(); });
-    document.getElementById('tray-wifi').addEventListener('click', () => notify({ title: '网络', body: 'Wi-Fi：已连接 KevinOS-5G（模拟）' }));
+    document.getElementById('tray-wifi').addEventListener('click', e => { e.stopPropagation(); toggleWifiPanel(); });
     document.getElementById('tray-volume').addEventListener('click', () => showOSD('音量 ' + K.system.settings.volume + '%'));
 
     // 亮度/音量
@@ -483,6 +569,7 @@
       if (!e.target.closest('#context-menu')) hideContextMenu();
       if (!e.target.closest('#start-menu') && !e.target.closest('#start-btn') && !e.target.closest('#search-panel')) closeStartMenu();
       if (!e.target.closest('#action-center') && !e.target.closest('#tray-notif') && !e.target.closest('#tray-clock')) closeActionCenter();
+      if (!e.target.closest('#wifi-panel') && !e.target.closest('#tray-wifi')) closeWifiPanel();
       if (!e.target.closest('#search-panel') && !e.target.closest('#global-search')) closeSearch();
       if (!e.target.closest('.desk-icon')) desktop.querySelectorAll('.desk-icon').forEach(n => n.classList.remove('selected'));
     });
@@ -497,6 +584,7 @@
     renderTaskbar();
     renderNotifs();
     renderActionCenter();
+    initNetwork();
     updateClock();
     setInterval(updateClock, 1000);
   }
@@ -506,6 +594,7 @@
     renderDesktopIcons, renderTaskbar, renderNotifs, renderActionCenter,
     renderStartApps, openStartMenu, closeStartMenu, toggleStartMenu,
     openActionCenter, closeActionCenter, showOSD,
+    openWifiPanel, closeWifiPanel, toggleWifiPanel, renderWifiPanel, updateWifiTray,
     openLaunchpad, closeLaunchpad, toggleLaunchpad, renderLaunchpad,
     desktopMenu
   };

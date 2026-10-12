@@ -9,7 +9,7 @@
   K.registerApp({
     id: 'about', name: '关于本机', icon: 'about',
     gradient: ['#1b2a4a', '#24365f'], pinned: false, category: '系统',
-    size: { w: 460, h: 620 }, resizable: false, single: true,
+    size: { w: 470, h: 640 }, resizable: true, single: true,
     mount(win) {
       const root = el('div', { class: 'about' }, [
         el('img', { src: 'assets/logo.png', alt: 'KevinOS' }),
@@ -18,7 +18,13 @@
         el('div', { class: 'tagline', text: '一个完全运行在浏览器中的桌面操作系统。内置浏览器、文件管理器、终端、媒体播放器等全套原生应用，所有数据保存在你的浏览器本地。' })
       ]);
 
-      const info = el('div', { style: { width: '100%', maxWidth: '380px', marginTop: '10px' } });
+      const actions = el('div', { class: 'about-actions' }, [
+        (() => { const b = el('button', { class: 'btn primary', text: '打开设置' }); b.addEventListener('click', () => K.WM.open('settings')); return b; })(),
+        (() => { const b = el('button', { class: 'btn', text: '打开终端' }); b.addEventListener('click', () => K.WM.open('terminal')); return b; })()
+      ]);
+      root.appendChild(actions);
+
+      const info = el('div', { class: 'about-info' });
       [
         ['处理器', 'KevinKernel 5.1-web (单核虚拟)'],
         ['内存', '浏览器堆内存（动态分配）'],
@@ -30,12 +36,7 @@
       ].forEach(([k, v]) => info.appendChild(el('div', { class: 'kv' }, [el('span', { class: 'k', text: k }), el('span', { class: 'v', text: v })])));
       root.appendChild(info);
 
-      const actions = el('div', { style: { display: 'flex', gap: '10px', marginTop: '18px' } }, [
-        (() => { const b = el('button', { class: 'btn primary', text: '打开设置' }); b.addEventListener('click', () => K.WM.open('settings')); return b; })(),
-        (() => { const b = el('button', { class: 'btn', text: '打开终端' }); b.addEventListener('click', () => K.WM.open('terminal')); return b; })()
-      ]);
-      root.appendChild(actions);
-      root.appendChild(el('div', { style: { marginTop: '20px', fontSize: '11.5px', color: 'var(--text-dim)' }, text: '© 2026 KevinOS Project · 用 HTML / CSS / JavaScript 构建' }));
+      root.appendChild(el('div', { class: 'about-foot', text: '© 2026 KevinOS Project · 用 HTML / CSS / JavaScript 构建' }));
 
       win.body.appendChild(root);
     }
