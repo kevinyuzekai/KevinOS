@@ -1,0 +1,118 @@
+/* ===== KevinOS · 窗口系统 ===== */
+.windows-layer { position: absolute; inset: 0; z-index: 100; pointer-events: none; }
+
+.window {
+  position: absolute;
+  display: flex; flex-direction: column;
+  min-width: 320px; min-height: 200px;
+  border-radius: var(--radius);
+  background: var(--surface-solid);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow-window);
+  overflow: hidden;
+  pointer-events: auto;
+  transform-origin: center;
+  will-change: transform, opacity, width, height;
+}
+.theme-glass .window { background: var(--surface); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
+
+/* 打开 / 关闭 / 最小化动画 */
+.window.anim-open { animation: winOpen .42s var(--ease-spring) both; }
+@keyframes winOpen {
+  0% { opacity: 0; transform: scale(.86) translateY(22px); filter: blur(6px); }
+  60% { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: none; }
+}
+.window.anim-close { animation: winClose .26s var(--ease) forwards; pointer-events: none; }
+@keyframes winClose { to { opacity: 0; transform: scale(.9) translateY(16px); filter: blur(4px); } }
+.window.anim-min { animation: winMin .34s var(--ease) forwards; pointer-events: none; }
+@keyframes winMin { to { opacity: 0; transform: scale(.4) translateY(160px); filter: blur(4px); } }
+.window.anim-restore { animation: winOpen .38s var(--ease-spring) both; }
+.window.anim-max { transition: all .3s var(--ease); }
+.window.dragging { transition: none !important; }
+.window.resizing { transition: none !important; }
+
+.window.minimized { display: none; }
+.window.focused { box-shadow: 0 34px 90px -22px rgba(0,0,0,.62), 0 8px 22px rgba(0,0,0,.28); }
+.window:not(.focused) { opacity: .98; }
+
+/* ---- 标题栏 ---- */
+.win-titlebar {
+  height: 44px; flex: 0 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 8px 0 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--stroke);
+  cursor: default;
+}
+.win-titlebar .wt-ico { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; color: #fff; }
+.win-titlebar .wt-ico svg { width: 14px; height: 14px; fill: currentColor; }
+.win-title { flex: 1; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.win-sub { font-size: 11.5px; color: var(--text-dim); font-weight: 400; margin-left: 8px; }
+
+.win-controls { display: flex; align-items: center; gap: 2px; }
+.win-btn {
+  width: 34px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+  color: var(--text-dim); transition: background-color .16s var(--ease), color .16s var(--ease), transform .16s var(--ease-spring);
+}
+.win-btn svg { width: 14px; height: 14px; fill: currentColor; }
+.win-btn:hover { background: var(--stroke); color: var(--text); }
+.win-btn:active { transform: scale(.88); }
+.win-btn.close:hover { background: var(--danger); color: #fff; }
+.win-btn.maximize:hover { background: var(--accent); color: #fff; }
+
+/* ---- 内容区 ---- */
+.win-body { flex: 1; position: relative; overflow: hidden; background: var(--surface-solid); display: flex; }
+.win-body > * { flex: 1; min-width: 0; min-height: 0; }
+
+/* ---- 缩放手柄 ---- */
+.rs { position: absolute; z-index: 5; }
+.rs-n { top: -3px; left: 8px; right: 8px; height: 6px; cursor: ns-resize; }
+.rs-s { bottom: -3px; left: 8px; right: 8px; height: 6px; cursor: ns-resize; }
+.rs-w { left: -3px; top: 8px; bottom: 8px; width: 6px; cursor: ew-resize; }
+.rs-e { right: -3px; top: 8px; bottom: 8px; width: 6px; cursor: ew-resize; }
+.rs-nw { left: -3px; top: -3px; width: 12px; height: 12px; cursor: nwse-resize; }
+.rs-ne { right: -3px; top: -3px; width: 12px; height: 12px; cursor: nesw-resize; }
+.rs-sw { left: -3px; bottom: -3px; width: 12px; height: 12px; cursor: nesw-resize; }
+.rs-se { right: -3px; bottom: -3px; width: 12px; height: 12px; cursor: nwse-resize; }
+
+/* ---- 吸附预览 ---- */
+.snap-preview {
+  position: absolute; z-index: 90; pointer-events: none;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 9999px rgba(6,10,22,.28), 0 0 30px var(--accent-glow);
+  transition: all .18s var(--ease);
+}
+
+/* ---- 通用对话框 ---- */
+.os-dialog-layer { position: absolute; inset: 0; z-index: 9000; display: grid; place-items: center; }
+.os-dialog-veil { position: absolute; inset: 0; background: rgba(6,10,22,.4); backdrop-filter: blur(3px); animation: fadeIn .2s var(--ease) both; }
+.os-dialog {
+  position: relative; width: min(420px, calc(100vw - 40px)); border-radius: var(--radius-lg);
+  background: var(--surface-solid); border: 1px solid var(--stroke); box-shadow: var(--shadow-window);
+  padding: 22px; animation: dlgIn .3s var(--ease-spring) both; overflow: hidden;
+}
+.os-dialog.leaving { animation: winClose .24s var(--ease) forwards; }
+@keyframes dlgIn { from { opacity: 0; transform: scale(.9) translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.dlg-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.dlg-msg { font-size: 13.5px; color: var(--text-dim); line-height: 1.55; margin-bottom: 18px; }
+.dlg-input {
+  width: 100%; height: 42px; padding: 0 14px; border-radius: 11px; margin-bottom: 18px;
+  background: var(--surface-2); border: 1px solid var(--stroke); font-size: 14px;
+}
+.dlg-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.btn {
+  height: 40px; padding: 0 20px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  background: var(--surface-2); border: 1px solid var(--stroke); color: var(--text);
+  transition: transform .16s var(--ease-spring), background-color .16s var(--ease), box-shadow .2s;
+}
+.btn:hover { background: var(--accent-soft); }
+.btn:active { transform: scale(.96); }
+.btn.primary { background: var(--accent); color: #fff; border-color: transparent; box-shadow: 0 10px 24px -10px var(--accent-glow); }
+.btn.primary:hover { background: var(--accent-2); }
+.btn.danger { background: var(--danger); color: #fff; border-color: transparent; }
+.btn.ghost { background: transparent; }
