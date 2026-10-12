@@ -6,6 +6,8 @@
   'use strict';
 
   const STORAGE_KEY = 'kevinos.fs.v1';
+  /* 演示模式：每次启动都清空文件系统，不做持久化 */
+  const PERSIST = false;
 
   const MIME = {
     txt: 'text/plain', md: 'text/markdown', js: 'text/javascript', json: 'application/json',
@@ -90,14 +92,20 @@
   let root;
 
   function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) { root = JSON.parse(raw); return; }
-    } catch (e) { /* ignore */ }
+    // 演示模式：忽略历史数据，始终从默认目录树开始
+    if (PERSIST) {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { root = JSON.parse(raw); return; }
+      } catch (e) { /* ignore */ }
+    } else {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+    }
     root = defaultTree();
     save();
   }
   function save() {
+    if (!PERSIST) return;   // 演示模式下不写入本地存储
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(root)); }
     catch (e) { console.warn('FS 保存失败', e); }
   }

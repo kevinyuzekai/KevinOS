@@ -19,7 +19,8 @@
     settings: '系统设置：主题、强调色、壁纸、亮度与音量。',
     about: '查看 KevinOS 的版本与硬件信息。',
     weather: '查看任意城市的实时天气、逐小时与未来 7 天预报。',
-    code: '类 VS Code 代码编辑器：文件树、多标签、语法高亮与命令面板。'
+    code: '类 VS Code 代码编辑器：文件树、多标签、语法高亮与命令面板。',
+    office: 'KevinOffice 办公套件：文字、表格、演示与 PDF，兼容 WPS 主要功能。'
   };
 
   K.registerApp({

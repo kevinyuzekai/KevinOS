@@ -11,6 +11,7 @@
     { app: 'files', name: '文件管理器' },
     { app: 'browser', name: '浏览器' },
     { app: 'code', name: '代码编辑器' },
+    { app: 'office', name: 'KevinOffice' },
     { app: 'terminal', name: '终端' },
     { app: 'weather', name: '天气' },
     { app: 'store', name: '应用商店' },

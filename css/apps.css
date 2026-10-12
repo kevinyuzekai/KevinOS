@@ -393,7 +393,7 @@
 .cd-palette-item:hover { background: #094771; color: #fff; }
 
 /* ============ 关于 ============ */
-.about { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 9px; text-align: center; padding: 22px; overflow-y: auto; background: radial-gradient(120% 120% at 50% 0%, var(--accent-soft), transparent 60%); }
+.about { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 24px; overflow-y: auto; background: radial-gradient(120% 120% at 50% 0%, var(--accent-soft), transparent 60%); }
 .about img { width: 96px; height: 96px; border-radius: 24px; flex: 0 0 auto; box-shadow: 0 22px 50px -16px var(--accent-glow); animation: logoFloat 4s ease-in-out infinite; }
 .about h1 { font-size: 28px; letter-spacing: 2px; }
 .about .ver { font-size: 12.5px; color: var(--text-dim); }

@@ -1,0 +1,164 @@
+/* ============================================================
+ * KevinOS · 触屏适配（手机 / 手表 / 平板）
+ * 依据 <html data-device="phone|tablet|watch|desktop" data-touch="on|off">
+ * 设备型号仅在 JS 内部识别（K.device.model），界面不展示。
+ * ============================================================ */
+
+/* ---------- 通用触屏优化 ---------- */
+html[data-touch="on"] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+html[data-touch="on"] body { touch-action: manipulation; }
+html[data-touch="on"] * { -webkit-user-select: none; user-select: none; }
+html[data-touch="on"] input,
+html[data-touch="on"] textarea,
+html[data-touch="on"] [contenteditable="true"],
+html[data-touch="on"] .selectable { -webkit-user-select: text; user-select: text; }
+
+/* 触屏设备不需要 hover 悬浮态，避免"粘滞"效果 */
+@media (hover: none) {
+  .desk-icon:hover, .tb-app:hover, .start-app:hover,
+  .lp-app:hover .app-ico, .ac-toggle:hover, .btn:hover,
+  .tray-btn:hover, .taskbar-btn:hover, .start-btn:hover { transform: none; }
+}
+
+/* 触屏放大点击热区 */
+html[data-touch="on"] .win-btn { width: 40px; height: 36px; }
+html[data-touch="on"] .tray-btn { min-width: 42px; height: 42px; }
+html[data-touch="on"] .tray-clock { height: 42px; }
+html[data-touch="on"] .start-btn,
+html[data-touch="on"] .taskbar-btn { width: 44px; height: 44px; }
+html[data-touch="on"] .ctx-item { padding: 12px 13px; }
+html[data-touch="on"] .ctx-item .ico,
+html[data-touch="on"] .ctx-item .ico svg { width: 18px; height: 18px; }
+
+/* 触屏隐藏缩放手柄（改用最大化/全屏），保留拖动 */
+html[data-touch="on"] .rs { display: none; }
+
+/* ============================================================
+ * 手机
+ * ============================================================ */
+html[data-device="phone"] .taskbar {
+  left: 6px; right: 6px; bottom: 6px; width: auto;
+  transform: none; animation: none;
+  height: 56px; padding: 0 6px; gap: 5px; border-radius: 16px;
+}
+html[data-device="phone"] .taskbar-search { display: none; }
+html[data-device="phone"] .tray-clock .clock-date { display: none; }
+html[data-device="phone"] .tb-preview { bottom: 68px; }
+
+html[data-device="phone"] .start-menu,
+html[data-device="phone"] .action-center,
+html[data-device="phone"] .wifi-panel {
+  left: 6px; right: 6px; bottom: 70px; width: auto;
+  transform: translateY(14px) scale(.98);
+  max-height: calc(100vh - 86px);
+}
+html[data-device="phone"] .start-menu.open,
+html[data-device="phone"] .action-center.open { transform: none; }
+
+html[data-device="phone"] .desktop-icons {
+  inset: 8px 8px 74px 8px;
+  grid-auto-columns: 84px;
+  grid-template-rows: repeat(auto-fill, 92px);
+  gap: 4px;
+}
+html[data-device="phone"] .desk-icon { width: 84px; height: 92px; }
+
+/* 手机窗口：全屏铺满（除任务栏） */
+html[data-device="phone"] .window {
+  left: 0 !important; top: 0 !important;
+  width: 100% !important; height: calc(100% - 68px) !important;
+  min-width: 0; min-height: 0;
+  border-radius: 0; border-left: none; border-right: none;
+}
+html[data-device="phone"] .win-titlebar { height: 50px; padding-left: 16px; }
+html[data-device="phone"] .win-body > * { min-width: 0; }
+
+/* 手机启动台：4 列 */
+html[data-device="phone"] .lp-page { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 104px; }
+html[data-device="phone"] .lp-app { width: 84px; }
+html[data-device="phone"] .lp-app .app-ico { width: 58px; height: 58px; border-radius: 15px; }
+html[data-device="phone"] .lp-app .app-ico svg { width: 30px; height: 30px; }
+html[data-device="phone"] .lp-inner { padding: 22px 12px 18px; }
+html[data-device="phone"] .lp-search-wrap { width: 86vw; height: 42px; }
+
+/* 手机对话框 */
+html[data-device="phone"] .os-dialog { width: calc(100vw - 28px); }
+
+/* 手机端应用内部横向元素更紧凑 */
+html[data-device="phone"] .app-col,
+html[data-device="phone"] .app-row { font-size: 13px; }
+
+/* ============================================================
+ * 平板
+ * ============================================================ */
+html[data-device="tablet"] .taskbar {
+  left: 10px; right: 10px; width: auto; transform: none; animation: none;
+}
+html[data-device="tablet"] .start-menu,
+html[data-device="tablet"] .action-center { max-height: calc(100vh - 100px); }
+html[data-device="tablet"] .lp-page { grid-template-columns: repeat(6, 1fr); }
+html[data-device="tablet"] .window { border-radius: var(--radius); }
+
+/* ============================================================
+ * 手表（极小屏）
+ * ============================================================ */
+html[data-device="watch"] .taskbar {
+  left: 4px; right: 4px; bottom: 4px; width: auto;
+  transform: none; animation: none;
+  height: 48px; padding: 0 4px; gap: 3px; border-radius: 14px;
+}
+html[data-device="watch"] .taskbar-search,
+html[data-device="watch"] .tray-items,
+html[data-device="watch"] .clock-date { display: none; }
+html[data-device="watch"] .clock-time { font-size: 12px; }
+html[data-device="watch"] .tray-clock { padding: 0 6px; }
+
+html[data-device="watch"] .start-menu,
+html[data-device="watch"] .action-center,
+html[data-device="watch"] .wifi-panel {
+  left: 4px; right: 4px; bottom: 58px; width: auto;
+  max-height: calc(100vh - 72px);
+  transform: translateY(10px) scale(.98);
+}
+html[data-device="watch"] .start-menu.open,
+html[data-device="watch"] .action-center.open { transform: none; }
+
+/* 手表窗口：单列全屏 */
+html[data-device="watch"] .window {
+  left: 0 !important; top: 0 !important;
+  width: 100% !important; height: calc(100% - 56px) !important;
+  min-width: 0; min-height: 0;
+  border-radius: 0; border: none;
+}
+html[data-device="watch"] .win-titlebar { height: 44px; padding-left: 12px; }
+html[data-device="watch"] .win-title { font-size: 12px; }
+html[data-device="watch"] .win-btn { width: 36px; height: 34px; }
+
+/* 手表启动台：3 列大图标，单屏滚动 */
+html[data-device="watch"] .lp-inner { padding: 12px 6px 10px; }
+html[data-device="watch"] .lp-search-wrap { width: 92vw; height: 40px; }
+html[data-device="watch"] .lp-page { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 88px; }
+html[data-device="watch"] .lp-app { width: 74px; }
+html[data-device="watch"] .lp-app .app-ico { width: 50px; height: 50px; border-radius: 14px; }
+html[data-device="watch"] .lp-app .app-ico svg { width: 26px; height: 26px; }
+html[data-device="watch"] .lp-app .lp-name { font-size: 11px; }
+html[data-device="watch"] .lp-pages { margin-top: 8px; }
+
+html[data-device="watch"] .desktop-icons {
+  inset: 6px 6px 62px 6px;
+  grid-auto-columns: 68px; grid-template-rows: repeat(auto-fill, 78px);
+}
+html[data-device="watch"] .desk-icon { width: 68px; height: 78px; padding: 6px 2px; }
+html[data-device="watch"] .desk-icon .di-label { font-size: 10.5px; }
+html[data-device="watch"] .os-dialog { width: calc(100vw - 20px); padding: 16px; }
+html[data-device="watch"] .toast-stack { width: calc(100vw - 16px); right: 8px; bottom: 60px; }
+
+/* 兜底：极窄视口（不足 380px）统一按手机处理 */
+@media (max-width: 380px) {
+  html:not([data-device="watch"]) .taskbar { left: 6px; right: 6px; width: auto; transform: none; animation: none; }
+  html:not([data-device="watch"]) .window { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100% - 68px) !important; min-width: 0; min-height: 0; border-radius: 0; }
+  html:not([data-device="watch"]) .lp-page { grid-template-columns: repeat(4, 1fr); }
+}
