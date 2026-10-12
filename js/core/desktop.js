@@ -10,7 +10,9 @@
   const DESKTOP_SHORTCUTS = [
     { app: 'files', name: '文件管理器' },
     { app: 'browser', name: '浏览器' },
+    { app: 'code', name: '代码编辑器' },
     { app: 'terminal', name: '终端' },
+    { app: 'weather', name: '天气' },
     { app: 'store', name: '应用商店' },
     { app: 'notes', name: '便签' },
     { app: 'about', name: '关于本机' }
@@ -112,6 +114,7 @@
       wrap.addEventListener('dblclick', () => {
         if (node.type === 'folder') K.WM.open('files', { path });
         else if (FS.kind(node.name) === 'image') K.WM.open('photos', { path });
+        else if (FS.kind(node.name) === 'code') K.WM.open('code', { path });
         else K.WM.open('editor', { path });
       });
       wrap.addEventListener('contextmenu', e => {
@@ -246,6 +249,82 @@
   }
   function toggleActionCenter() { document.getElementById('action-center').classList.contains('open') ? closeActionCenter() : openActionCenter(); }
 
+  /* ---------------- 启动台（Launchpad） ---------------- */
+  const LP_COLS = 7, LP_ROWS = 3, LP_PER_PAGE = LP_COLS * LP_ROWS;
+  let lpPage = 0, lpPageCount = 1;
+
+  function lpSort(a, b) {
+    if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+    return a.name.localeCompare(b.name, 'zh');
+  }
+  function lpUpdateTrack() {
+    const track = document.getElementById('lp-track');
+    if (track) track.style.transform = `translateX(${-lpPage * 100}%)`;
+    document.querySelectorAll('#lp-pages .lp-dot').forEach((d, i) => d.classList.toggle('active', i === lpPage));
+  }
+  function renderLaunchpad(filter) {
+    const q = (filter || '').trim().toLowerCase();
+    const track = document.getElementById('lp-track');
+    const pagesEl = document.getElementById('lp-pages');
+    track.innerHTML = ''; pagesEl.innerHTML = '';
+
+    const apps = K.apps.allApps().filter(a =>
+      !q || a.name.toLowerCase().includes(q) || a.id.includes(q) || (a.category || '').toLowerCase().includes(q)
+    ).sort(lpSort);
+
+    const pages = [];
+    for (let i = 0; i < apps.length; i += LP_PER_PAGE) pages.push(apps.slice(i, i + LP_PER_PAGE));
+    if (!pages.length) pages.push([]);
+    lpPageCount = pages.length;
+    if (lpPage > lpPageCount - 1) lpPage = lpPageCount - 1;
+    if (lpPage < 0) lpPage = 0;
+
+    pages.forEach((pageApps, pi) => {
+      const page = el('div', { class: 'lp-page' });
+      if (!pageApps.length) {
+        page.appendChild(el('div', { class: 'lp-empty', text: '没有匹配的应用' }));
+      }
+      pageApps.forEach((app, idx) => {
+        const item = el('div', { class: 'lp-app' }, [K.apps.appIconEl(app), el('div', { class: 'lp-name', text: app.name })]);
+        item.style.animationDelay = (pi === lpPage ? idx * 16 : 0) + 'ms';
+        item.addEventListener('click', () => { closeLaunchpad(); setTimeout(() => K.WM.open(app.id), 140); });
+        page.appendChild(item);
+      });
+      track.appendChild(page);
+    });
+
+    pages.forEach((_, i) => {
+      const dot = el('div', { class: 'lp-dot' + (i === lpPage ? ' active' : '') });
+      dot.addEventListener('click', () => { lpPage = i; lpUpdateTrack(); });
+      pagesEl.appendChild(dot);
+    });
+    pagesEl.hidden = lpPageCount <= 1;
+    lpUpdateTrack();
+  }
+  function lpGo(delta) {
+    const next = Math.min(lpPageCount - 1, Math.max(0, lpPage + delta));
+    if (next === lpPage) return;
+    lpPage = next; lpUpdateTrack();
+  }
+  function openLaunchpad() {
+    closeStartMenu(); closeActionCenter();
+    const lp = document.getElementById('launchpad');
+    lp.hidden = false; lpPage = 0;
+    const s = document.getElementById('lp-search'); s.value = '';
+    renderLaunchpad('');
+    requestAnimationFrame(() => lp.classList.add('open'));
+    document.getElementById('launchpad-btn').classList.add('active');
+    setTimeout(() => s.focus(), 140);
+  }
+  function closeLaunchpad() {
+    const lp = document.getElementById('launchpad');
+    if (lp.hidden) return;
+    lp.classList.remove('open');
+    document.getElementById('launchpad-btn').classList.remove('active');
+    setTimeout(() => { if (!lp.classList.contains('open')) lp.hidden = true; }, 340);
+  }
+  function toggleLaunchpad() { document.getElementById('launchpad').classList.contains('open') ? closeLaunchpad() : openLaunchpad(); }
+
   /* ---------------- 全局搜索 ---------------- */
   let searchPanel = null;
   function ensureSearchPanel() {
@@ -339,12 +418,37 @@
       if (r === 'reboot') K.system.reboot();
     });
 
+    // 启动台
+    document.getElementById('launchpad-btn').addEventListener('click', e => { e.stopPropagation(); toggleLaunchpad(); });
+    document.getElementById('start-all-apps').addEventListener('click', e => { e.stopPropagation(); openLaunchpad(); });
+    document.getElementById('desktop').addEventListener('click', e => {
+      const t = e.target.closest('[data-open-app]');
+      if (t) { K.WM.open(t.dataset.openApp); closeStartMenu(); }
+    });
+    document.getElementById('lp-search').addEventListener('input', e => { lpPage = 0; renderLaunchpad(e.target.value); });
+    document.getElementById('lp-search').addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeLaunchpad();
+      if (e.key === 'ArrowRight') lpGo(1);
+      if (e.key === 'ArrowLeft') lpGo(-1);
+      if (e.key === 'Enter') {
+        const q = e.target.value.trim().toLowerCase();
+        const app = K.apps.allApps().find(a => a.name.toLowerCase().includes(q) || a.id === q);
+        if (app) { closeLaunchpad(); setTimeout(() => K.WM.open(app.id), 140); }
+      }
+    });
+    document.getElementById('launchpad').addEventListener('click', e => {
+      if (e.target.closest('.lp-app') || e.target.closest('.lp-search-wrap') || e.target.closest('.lp-dot')) return;
+      closeLaunchpad();
+    });
+    document.getElementById('lp-viewport').addEventListener('wheel', e => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && Math.abs(e.deltaY) > 18) lpGo(e.deltaY > 0 ? 1 : -1);
+    }, { passive: true });
+
     // 托盘
     document.getElementById('tray-notif').addEventListener('click', e => { e.stopPropagation(); toggleActionCenter(); });
     document.getElementById('tray-clock').addEventListener('click', e => { e.stopPropagation(); toggleActionCenter(); });
     document.getElementById('tray-wifi').addEventListener('click', () => notify({ title: '网络', body: 'Wi-Fi：已连接 KevinOS-5G（模拟）' }));
     document.getElementById('tray-volume').addEventListener('click', () => showOSD('音量 ' + K.system.settings.volume + '%'));
-    document.getElementById('tray-battery').addEventListener('click', () => notify({ title: '电源', body: '电量 87% · 预计剩余 5 小时（模拟）' }));
 
     // 亮度/音量
     document.getElementById('ac-brightness').addEventListener('input', e => K.system.setBrightness(+e.target.value));
@@ -402,6 +506,7 @@
     renderDesktopIcons, renderTaskbar, renderNotifs, renderActionCenter,
     renderStartApps, openStartMenu, closeStartMenu, toggleStartMenu,
     openActionCenter, closeActionCenter, showOSD,
+    openLaunchpad, closeLaunchpad, toggleLaunchpad, renderLaunchpad,
     desktopMenu
   };
 })();

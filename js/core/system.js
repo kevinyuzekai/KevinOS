@@ -101,6 +101,8 @@
   function bindShortcuts() {
     window.addEventListener('keydown', e => {
       const mod = e.ctrlKey || e.metaKey;
+      // F4 启动台
+      if (e.key === 'F4') { e.preventDefault(); K.desktop.toggleLaunchpad(); return; }
       // Alt+Tab 切换窗口
       if (e.altKey && e.key === 'Tab') {
         e.preventDefault();
@@ -134,6 +136,7 @@
       // Esc 关闭面板
       if (e.key === 'Escape') {
         K.desktop.closeStartMenu(); K.desktop.closeActionCenter(); K.desktop.hideContextMenu();
+        K.desktop.closeLaunchpad();
       }
       // Ctrl+Alt+Del 电源菜单
       if (e.ctrlKey && e.altKey && (e.key === 'Delete' || e.key === 'Backspace')) {

@@ -47,6 +47,7 @@
     const kind = FS.kind(node.name);
     if (kind === 'image') K.WM.open('photos', { path });
     else if (kind === 'audio') K.WM.open('media', { path });
+    else if (kind === 'code') K.WM.open('code', { path });
     else K.WM.open('editor', { path });
   }
 

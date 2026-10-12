@@ -315,8 +315,94 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
 }
 @keyframes osdIn { from { opacity: 0; transform: translateX(-50%) translateY(-14px); } to { opacity: 1; transform: translateX(-50%); } }
 
+/* ---- 任务栏图标按钮（启动台等） ---- */
+.taskbar-btn {
+  width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center;
+  color: var(--text-dim);
+  transition: transform .2s var(--ease-spring), background-color .2s var(--ease), color .2s var(--ease), box-shadow .2s;
+}
+.taskbar-btn svg.ico { width: 20px; height: 20px; fill: currentColor; }
+.taskbar-btn:hover { background: var(--accent-soft); color: var(--text); }
+.taskbar-btn:active { transform: scale(.9); }
+.taskbar-btn.active { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* ---- 启动台（Launchpad） ---- */
+.launchpad {
+  position: absolute; inset: 0; z-index: 820;
+  opacity: 0; pointer-events: none;
+  transition: opacity .34s var(--ease);
+}
+.launchpad.open { opacity: 1; pointer-events: auto; }
+.lp-bg {
+  position: absolute; inset: -20px;
+  background: rgba(8, 12, 24, .42);
+  -webkit-backdrop-filter: blur(48px) saturate(160%);
+  backdrop-filter: blur(48px) saturate(160%);
+  transform: scale(1.07);
+  transition: transform .55s var(--ease);
+}
+.launchpad.open .lp-bg { transform: scale(1); }
+.lp-inner {
+  position: relative; z-index: 1; width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 40px 28px;
+}
+.lp-search-wrap {
+  display: flex; align-items: center; gap: 8px;
+  height: 38px; width: min(320px, 62vw); padding: 0 14px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.85);
+  transform: translateY(-12px); opacity: 0;
+  transition: transform .4s var(--ease), opacity .34s var(--ease), background-color .2s, border-color .2s, box-shadow .2s;
+}
+.launchpad.open .lp-search-wrap { transform: none; opacity: 1; transition-delay: .06s; }
+.lp-search-wrap:focus-within { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.5); box-shadow: 0 0 0 3px rgba(255,255,255,.14); }
+.lp-search-wrap svg.ico { width: 16px; height: 16px; fill: currentColor; flex: 0 0 auto; }
+.lp-search-wrap input { flex: 1; min-width: 0; font-size: 13.5px; color: #fff; }
+.lp-search-wrap input::placeholder { color: rgba(255,255,255,.6); }
+.lp-viewport { flex: 1; width: 100%; overflow: hidden; margin-top: 26px; }
+.lp-track { display: flex; height: 100%; transition: transform .46s var(--ease); }
+.lp-page {
+  flex: 0 0 100%; height: 100%;
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 120px; gap: 6px 8px;
+  align-content: start; justify-items: center;
+  padding: 4px 0; overflow-y: auto;
+}
+.lp-app {
+  width: 108px; display: flex; flex-direction: column; align-items: center; gap: 9px;
+  padding: 10px 4px; border-radius: 14px; cursor: pointer;
+  animation: lpIn .42s var(--ease-spring) both;
+  transition: background-color .18s var(--ease);
+}
+.lp-app:hover { background: rgba(255,255,255,.1); }
+.lp-app .app-ico {
+  width: 74px; height: 74px; border-radius: 19px;
+  transition: transform .22s var(--ease-spring), box-shadow .22s;
+}
+.lp-app .app-ico svg { width: 38px; height: 38px; }
+.lp-app:hover .app-ico { transform: translateY(-4px) scale(1.07); box-shadow: 0 16px 30px -12px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.28); }
+.lp-app:active .app-ico { transform: scale(.96); }
+.lp-app .lp-name {
+  font-size: 12.5px; color: #fff; text-align: center; line-height: 1.2;
+  text-shadow: 0 1px 4px rgba(0,0,0,.7);
+  max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+@keyframes lpIn { from { opacity: 0; transform: scale(.7) translateY(12px); } to { opacity: 1; transform: none; } }
+.lp-pages { display: flex; gap: 9px; margin-top: 16px; height: 10px; }
+.lp-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.32); cursor: pointer; transition: background-color .2s, transform .2s var(--ease-spring); }
+.lp-dot:hover { transform: scale(1.25); }
+.lp-dot.active { background: #fff; }
+.lp-empty { grid-column: 1/-1; text-align: center; color: rgba(255,255,255,.78); font-size: 14px; padding: 60px 0; }
+
 @media (max-width: 720px) {
   .taskbar-search { display: none; }
+  .lp-page { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 104px; }
+  .lp-app { width: 84px; }
+  .lp-app .app-ico { width: 58px; height: 58px; border-radius: 15px; }
+  .lp-app .app-ico svg { width: 30px; height: 30px; }
+  .lp-inner { padding: 24px 14px 20px; }
   .taskbar { left: 8px; right: 8px; transform: none; width: auto; animation: none; }
   .start-menu, .action-center { left: 8px; right: 8px; width: auto; transform: translateY(12px) scale(.98); }
   .start-menu.open { transform: none; }
