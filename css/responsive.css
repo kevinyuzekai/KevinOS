@@ -36,6 +36,50 @@ html[data-touch="on"] .ctx-item .ico svg { width: 18px; height: 18px; }
 /* 触屏隐藏缩放手柄（改用最大化/全屏），保留拖动 */
 html[data-touch="on"] .rs { display: none; }
 
+/* 窗口标题栏 / 缩放手柄：禁用浏览器手势，保证拖拽不被滚动打断 */
+.win-titlebar { touch-action: none; }
+.rs { touch-action: none; }
+
+/* 触屏：可点击元素禁用双击缩放，保证响应即时 */
+html[data-touch="on"] .taskbar-btn,
+html[data-touch="on"] .start-btn,
+html[data-touch="on"] .tray-btn,
+html[data-touch="on"] .tray-clock,
+html[data-touch="on"] .tb-app,
+html[data-touch="on"] .start-app,
+html[data-touch="on"] .lp-app,
+html[data-touch="on"] .desk-icon,
+html[data-touch="on"] .ctx-item,
+html[data-touch="on"] .ac-toggle,
+html[data-touch="on"] .start-foot-btn { touch-action: manipulation; }
+
+/* 触屏：桌面图标允许长按选中，滚动由 touch-action 控制 */
+html[data-touch="on"] .desktop-icons { touch-action: pan-y; }
+
+/* 触屏：窗口标题栏高度加大，便于手指拖动 */
+html[data-touch="on"] .win-titlebar { height: 48px; padding-top: 2px; }
+
+/* 触屏：按钮最小点击尺寸 44px（WCAG 建议） */
+html[data-touch="on"] .btn,
+html[data-touch="on"] .os-dialog .btn { min-height: 44px; padding: 0 18px; }
+
+/* 触屏：计算器按键最小高度，便于点击 */
+html[data-touch="on"] .calc-key { min-height: 52px; font-size: 20px; touch-action: manipulation; }
+
+/* 触屏：终端点击区域聚焦输入框（已有 click 监听，此处保证可点击） */
+html[data-touch="on"] .term { cursor: text; }
+html[data-touch="on"] .term-input { font-size: 16px; } /* 避免 iOS 聚焦时自动缩放 */
+
+/* 触屏：Office 等应用的功能区按钮加大点击区域 */
+html[data-touch="on"] .of-ribbon-btn,
+html[data-touch="on"] .of-tab { min-height: 40px; padding: 0 14px; }
+
+/* 触屏：防止文本选择干扰拖拽，但允许输入框编辑 */
+html[data-touch="on"] .win-body { -webkit-user-select: none; user-select: none; }
+html[data-touch="on"] .win-body input,
+html[data-touch="on"] .win-body textarea,
+html[data-touch="on"] .win-body [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
+
 /* ============================================================
  * 手机
  * ============================================================ */

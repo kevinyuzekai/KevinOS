@@ -79,12 +79,53 @@
   }
   function hideContextMenu() { document.getElementById('context-menu').hidden = true; }
 
+  /* ---------------- 触屏交互辅助 ---------------- */
+  // 在触屏设备上：单击打开、长按呼出上下文菜单；桌面端保留单击选中 / 双击打开
+  function isTouchDevice() { return K.device && K.device.isTouch; }
+
+  function bindTapAndLongPress(el, onTap, onLongPress) {
+    const LONG_MS = 500;
+    const MOVE_TOL = 10;
+    let timer = null, startX = 0, startY = 0, moved = false, longPressed = false;
+
+    el.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse') return; // 鼠标走原生 click/dblclick/contextmenu
+      moved = false; longPressed = false;
+      startX = e.clientX; startY = e.clientY;
+      timer = setTimeout(() => {
+        if (moved) return;
+        longPressed = true;
+        if (onLongPress) onLongPress(e);
+      }, LONG_MS);
+    });
+    el.addEventListener('pointermove', e => {
+      if (Math.abs(e.clientX - startX) > MOVE_TOL || Math.abs(e.clientY - startY) > MOVE_TOL) {
+        moved = true;
+        if (timer) { clearTimeout(timer); timer = null; }
+      }
+    });
+    el.addEventListener('pointerup', e => {
+      if (timer) { clearTimeout(timer); timer = null; }
+      if (e.pointerType === 'mouse') return;
+      if (longPressed || moved) return;
+      if (onTap) onTap(e);
+    });
+    el.addEventListener('pointercancel', () => {
+      if (timer) { clearTimeout(timer); timer = null; }
+    });
+  }
+
   /* ---------------- 桌面图标 ---------------- */
   function renderDesktopIcons() {
     const host = document.getElementById('desktop-icons');
     host.innerHTML = '';
     if (!K.system.settings.showDesktopIcons) { host.hidden = true; return; }
     host.hidden = false;
+
+    const selectIcon = (icon) => {
+      host.querySelectorAll('.desk-icon').forEach(n => n.classList.remove('selected'));
+      icon.classList.add('selected');
+    };
 
     DESKTOP_SHORTCUTS.forEach(sc => {
       const app = K.apps.getApp(sc.app);
@@ -93,11 +134,20 @@
         el('div', { class: 'di-img' }, [K.apps.appIconEl(app)]),
         el('div', { class: 'di-label', text: sc.name })
       ]);
+      const open = () => K.WM.open(sc.app);
       icon.addEventListener('click', () => {
-        host.querySelectorAll('.desk-icon').forEach(n => n.classList.remove('selected'));
-        icon.classList.add('selected');
+        if (isTouchDevice()) return; // 触屏由 pointerup 处理，避免重复
+        selectIcon(icon);
       });
-      icon.addEventListener('dblclick', () => K.WM.open(sc.app));
+      icon.addEventListener('dblclick', () => { if (!isTouchDevice()) open(); });
+      bindTapAndLongPress(icon, open, e => {
+        selectIcon(icon);
+        showContextMenu(e.clientX, e.clientY, [
+          { label: '打开', icon: 'about', act: open },
+          { sep: true },
+          { label: '从桌面移除', icon: 'settings', danger: true, act: () => notify({ title: '桌面', body: '系统应用无法从桌面移除' }) }
+        ]);
+      });
       host.appendChild(icon);
     });
 
@@ -111,21 +161,31 @@
         imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24">${K.ICONS.editor}</svg></span>`;
       }
       wrap.append(imgWrap, el('div', { class: 'di-label', text: node.name }));
-      wrap.addEventListener('click', () => { host.querySelectorAll('.desk-icon').forEach(n => n.classList.remove('selected')); wrap.classList.add('selected'); });
-      wrap.addEventListener('dblclick', () => {
+
+      const open = () => {
         if (node.type === 'folder') K.WM.open('files', { path });
         else if (FS.kind(node.name) === 'image') K.WM.open('photos', { path });
         else if (FS.kind(node.name) === 'code') K.WM.open('code', { path });
+        else if (FS.kind(node.name) === 'doc') K.WM.open('office', { path });
         else K.WM.open('editor', { path });
-      });
+      };
+      const menuItems = [
+        { label: '打开', icon: 'about', act: open },
+        { sep: true },
+        { label: '重命名', icon: 'editor', act: async () => { const n = await K.WM.UI.prompt('重命名', node.name, '重命名'); if (n) { const r = FS.rename(path, n); if (!r.ok) K.WM.UI.alert(r.error); } } },
+        { label: '删除', icon: 'settings', danger: true, act: async () => { const ok = await K.WM.UI.confirm(`确定删除「${node.name}」吗？`, '删除', { danger: true, okText: '删除' }); if (ok) FS.remove(path); } }
+      ];
+
+      wrap.addEventListener('click', () => { if (!isTouchDevice()) selectIcon(wrap); });
+      wrap.addEventListener('dblclick', () => { if (!isTouchDevice()) open(); });
       wrap.addEventListener('contextmenu', e => {
+        if (isTouchDevice()) return; // 触屏由长按处理
         e.preventDefault(); e.stopPropagation();
-        showContextMenu(e.clientX, e.clientY, [
-          { label: '打开', icon: 'about', act: () => wrap.dispatchEvent(new Event('dblclick')) },
-          { sep: true },
-          { label: '重命名', icon: 'editor', act: async () => { const n = await K.WM.UI.prompt('重命名', node.name, '重命名'); if (n) { const r = FS.rename(path, n); if (!r.ok) K.WM.UI.alert(r.error); } } },
-          { label: '删除', icon: 'settings', danger: true, act: async () => { const ok = await K.WM.UI.confirm(`确定删除「${node.name}」吗？`, '删除', { danger: true, okText: '删除' }); if (ok) FS.remove(path); } }
-        ]);
+        showContextMenu(e.clientX, e.clientY, menuItems);
+      });
+      bindTapAndLongPress(wrap, open, e => {
+        selectIcon(wrap);
+        showContextMenu(e.clientX, e.clientY, menuItems);
       });
       host.appendChild(wrap);
     });
@@ -162,16 +222,19 @@
         else if (win.focused) K.WM.minimize(win);
         else K.WM.focus(win);
       });
+      const ctxItems = [
+        { label: '还原 / 聚焦', icon: 'about', act: () => K.WM.restore(win) },
+        { label: win.state.minimized ? '显示' : '最小化', icon: 'media', act: () => win.state.minimized ? K.WM.restore(win) : K.WM.minimize(win) },
+        { label: '最大化 / 还原', icon: 'about', act: () => K.WM.toggleMax(win) },
+        { sep: true },
+        { label: '关闭窗口', icon: 'settings', danger: true, act: () => K.WM.close(win) }
+      ];
       b.addEventListener('contextmenu', e => {
+        if (isTouchDevice()) return;
         e.preventDefault();
-        showContextMenu(e.clientX, e.clientY - 10, [
-          { label: '还原 / 聚焦', icon: 'about', act: () => K.WM.restore(win) },
-          { label: win.state.minimized ? '显示' : '最小化', icon: 'media', act: () => win.state.minimized ? K.WM.restore(win) : K.WM.minimize(win) },
-          { label: '最大化 / 还原', icon: 'about', act: () => K.WM.toggleMax(win) },
-          { sep: true },
-          { label: '关闭窗口', icon: 'settings', danger: true, act: () => K.WM.close(win) }
-        ]);
+        showContextMenu(e.clientX, e.clientY - 10, ctxItems);
       });
+      bindTapAndLongPress(b, null, e => showContextMenu(e.clientX, e.clientY - 10, ctxItems));
       host.appendChild(b);
     });
   }
@@ -558,11 +621,16 @@
       if (e.key === 'Escape') closeSearch();
     });
 
-    // 桌面右键
+    // 桌面右键 / 触屏长按
     const desktop = document.getElementById('desktop');
     desktop.addEventListener('contextmenu', e => {
       if (e.target.closest('.window') || e.target.closest('.taskbar') || e.target.closest('.desk-icon') || e.target.closest('.start-menu') || e.target.closest('.action-center')) return;
       e.preventDefault();
+      desktopMenu(e.clientX, e.clientY);
+    });
+    // 触屏：桌面空白处长按呼出桌面菜单
+    bindTapAndLongPress(desktop, null, e => {
+      if (e.target.closest('.window') || e.target.closest('.taskbar') || e.target.closest('.desk-icon') || e.target.closest('.start-menu') || e.target.closest('.action-center') || e.target.closest('.launchpad')) return;
       desktopMenu(e.clientX, e.clientY);
     });
     // 空白点击
