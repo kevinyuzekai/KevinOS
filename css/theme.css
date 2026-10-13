@@ -142,8 +142,8 @@ html[data-accent="orange"] { --accent: #ff8a3d; --accent-2: #ffb37a; --accent-so
   overflow: hidden;
   animation: logLineIn .3s ease both;
 }
-.boot-log-time { color: #4a4a4a; margin-right: 10px; }
-.boot-log-msg { color: #8a8a8a; }
+.boot-log-time { color: #6a8ccf; margin-right: 12px; font-weight: 500; }
+.boot-log-msg { color: #b0b0b0; }
 @keyframes logLineIn {
   from { opacity: 0; transform: translateX(-6px); }
   to { opacity: 1; transform: none; }

@@ -214,12 +214,14 @@
   const LOG_LINES_BEFORE = [
     'INCOMING SYSTEM REQUEST DETECTED',
     'SERVICE WAKING UP',
-    'ALLOCATING COMPUTE RESOURCES'
+    'ALLOCATING COMPUTE RESOURCES',
+    'ESTABLISHING SECURE CONNECTION'
   ];
   const LOG_LINES_AFTER = [
     'PREPARING INSTANCE FOR INITIALIZATION',
     'LOADING KERNEL MODULES',
     'MOUNTING VIRTUAL FILESYSTEM',
+    'INITIALIZING WINDOW MANAGER',
     'STARTING DESKTOP ENVIRONMENT'
   ];
 
@@ -242,16 +244,16 @@
   function boot() {
     if (booted) return; booted = true;
     const start = Date.now();
-    const DURATION = 2600;
+    const DURATION = 6000;
 
     // 逐条输出日志
-    LOG_LINES_BEFORE.forEach((msg, i) => addLogLine('boot-logs', msg, i * 350));
-    LOG_LINES_AFTER.forEach((msg, i) => addLogLine('boot-logs2', msg, 900 + i * 350));
+    LOG_LINES_BEFORE.forEach((msg, i) => addLogLine('boot-logs', msg, i * 400));
+    LOG_LINES_AFTER.forEach((msg, i) => addLogLine('boot-logs2', msg, 1800 + i * 400));
 
     const timer = setInterval(() => {
       if (Date.now() - start >= DURATION) {
         clearInterval(timer);
-        setTimeout(finishBoot, 200);
+        setTimeout(finishBoot, 300);
       }
     }, 100);
   }
@@ -281,6 +283,6 @@
     wallpapers, boot
   };
 
-  window.addEventListener('DOMContentLoaded', boot);
-  if (document.readyState !== 'loading') boot();
+  window.addEventListener('load', boot);
+  if (document.readyState === 'complete') boot();
 })();
