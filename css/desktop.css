@@ -539,7 +539,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
 }
 .dock-app:hover .app-ico { transform: translateY(-12px) scale(1.25); }
 .dock-app:active .app-ico { transform: translateY(-6px) scale(1.1); }
-.dock-app.focused .app-ico { transform: translateY(-4px); }
+.dock-app.focused .app-ico { transform: none; }
 .dock-app.focused:hover .app-ico { transform: translateY(-12px) scale(1.25); }
 .dock-dot {
   width: 5px; height: 5px; border-radius: 50%;
