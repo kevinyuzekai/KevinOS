@@ -160,6 +160,8 @@
       { label: '刷新', icon: 'media', act: () => { renderDesktopIcons(); notify({ title: '桌面', body: '已刷新' }); } },
       { label: '排列图标', icon: 'about', act: () => renderDesktopIcons() },
       { sep: true },
+      { label: '添加小组件', icon: 'about', act: () => widgetMenu(x, y) },
+      { sep: true },
       { label: '新建文件夹', icon: 'files', act: async () => { const n = await K.WM.UI.prompt('新建文件夹', '新建文件夹', '新建'); if (n) FS.mkdir('/Home/Desktop/' + n); } },
       { label: '新建文本文件', icon: 'editor', act: async () => { const n = await K.WM.UI.prompt('新建文件', '新建文本文档.txt', '新建'); if (n) FS.writeFile('/Home/Desktop/' + n, ''); } },
       { sep: true },
@@ -172,7 +174,7 @@
   }
 
   /* ---------------- Dock（底部应用栏） ---------------- */
-  const DOCK_PINNED = ['files', 'browser', 'office', 'code', 'terminal', 'weather', 'notes', 'settings'];
+  const DOCK_PINNED = ['files', 'browser', 'ai', 'office', 'code', 'terminal', 'weather', 'notes', 'settings'];
 
   function renderDock() {
     const host = document.getElementById('dock-apps');
@@ -524,29 +526,54 @@
     osdTimer = setTimeout(() => osd.hidden = true, 1400);
   }
 
-  /* ---------------- 桌面小组件 ---------------- */
-  const WIDGETS = [
+  /* ---------------- 桌面小组件（用户手动添加） ---------------- */
+  const WIDGET_DEFS = [
     { id: 'w-clock', name: '时钟', w: 200, h: 140, render: wClock },
     { id: 'w-calendar', name: '日历', w: 220, h: 200, render: wCalendar },
     { id: 'w-weather', name: '天气', w: 200, h: 150, render: wWeather },
     { id: 'w-notes', name: '便签', w: 220, h: 160, render: wNotes }
   ];
-  let widgetPositions = JSON.parse(localStorage.getItem('kevinos.widgets.v1') || '{}');
+  const WIDGET_KEY = 'kevinos.widgets.v1';
+  let widgetState = loadWidgetState();
 
-  function saveWidgetPositions() { localStorage.setItem('kevinos.widgets.v1', JSON.stringify(widgetPositions)); }
+  function loadWidgetState() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(WIDGET_KEY) || '{}');
+      return { active: Array.isArray(raw.active) ? raw.active : [], positions: raw.positions || {} };
+    } catch (e) { return { active: [], positions: {} }; }
+  }
+  function saveWidgetState() { localStorage.setItem(WIDGET_KEY, JSON.stringify(widgetState)); }
 
-  function createWidget(def, idx) {
-    const pos = widgetPositions[def.id] || { x: window.innerWidth - def.w - 24 - idx * 8, y: 52 + idx * 12 };
+  function getWidgetDef(id) { return WIDGET_DEFS.find(d => d.id === id); }
+
+  function addWidget(id) {
+    const def = getWidgetDef(id);
+    if (!def || widgetState.active.includes(id)) return;
+    widgetState.active.push(id);
+    saveWidgetState();
+    renderWidgets();
+  }
+  function removeWidget(id) {
+    widgetState.active = widgetState.active.filter(x => x !== id);
+    delete widgetState.positions[id];
+    saveWidgetState();
+    renderWidgets();
+  }
+
+  function createWidget(def) {
+    const pos = widgetState.positions[def.id] || {
+      x: window.innerWidth - def.w - 24,
+      y: 52 + Object.keys(widgetState.positions).length * 12
+    };
     const w = el('div', { class: 'widget', id: def.id, style: { left: pos.x + 'px', top: pos.y + 'px', width: def.w + 'px' } });
     const head = el('div', { class: 'widget-head' }, [el('span', { class: 'widget-name', text: def.name })]);
     const body = el('div', { class: 'widget-body' });
-    const close = el('button', { class: 'widget-close', text: '×' });
-    close.addEventListener('click', e => { e.stopPropagation(); w.remove(); });
+    const close = el('button', { class: 'widget-close', text: '×', title: '移除' });
+    close.addEventListener('click', e => { e.stopPropagation(); removeWidget(def.id); });
     head.appendChild(close);
     w.append(head, body);
     def.render(body);
 
-    // 拖拽
     let sx = 0, sy = 0, ox = 0, oy = 0, dragging = false;
     head.addEventListener('pointerdown', e => {
       if (e.target.closest('.widget-close')) return;
@@ -559,16 +586,32 @@
       pos.y = Math.max(36, Math.min(oy + e.clientY - sy, window.innerHeight - 120));
       w.style.left = pos.x + 'px'; w.style.top = pos.y + 'px';
     });
-    document.addEventListener('pointerup', () => { if (dragging) { dragging = false; widgetPositions[def.id] = pos; saveWidgetPositions(); } });
-
+    document.addEventListener('pointerup', () => {
+      if (dragging) { dragging = false; widgetState.positions[def.id] = pos; saveWidgetState(); }
+    });
     return w;
   }
 
-  function initWidgets() {
+  function renderWidgets() {
     const host = document.getElementById('widgets-layer');
     if (!host) return;
     host.innerHTML = '';
-    WIDGETS.forEach((def, i) => host.appendChild(createWidget(def, i)));
+    widgetState.active.forEach(id => {
+      const def = getWidgetDef(id);
+      if (def) host.appendChild(createWidget(def));
+    });
+  }
+
+  function widgetMenu(x, y) {
+    const items = WIDGET_DEFS.map(def => ({
+      label: def.name + (widgetState.active.includes(def.id) ? '  ✓' : ''),
+      icon: 'about',
+      disabled: widgetState.active.includes(def.id),
+      act: () => addWidget(def.id)
+    }));
+    items.unshift({ sep: true });
+    items.unshift({ label: '← 返回', icon: 'about', act: () => desktopMenu(x, y) });
+    showContextMenu(x, y, items);
   }
 
   /* ---- 时钟小组件 ---- */
@@ -637,7 +680,7 @@
     const host = document.getElementById('mb-app-name');
     if (!host) return;
     const win = K.WM.windows.find(w => w.focused);
-    host.textContent = win ? win.app.name : 'Finder';
+    host.textContent = win ? win.app.name : '';
   }
 
   function init() {
@@ -734,7 +777,7 @@
     renderNotifs();
     renderActionCenter();
     initNetwork();
-    initWidgets();
+    renderWidgets();
     updateClock();
     setInterval(updateClock, 1000);
   }
