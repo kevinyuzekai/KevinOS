@@ -67,6 +67,9 @@
   const PROXIES = [
     u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
     u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+    u => 'https://corsproxy.io/?' + encodeURIComponent(u),
+    u => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u),
+    u => 'https://thingproxy.freeboard.io/fetch/' + u,
     u => 'https://cors.eu.org/' + u
   ];
 
@@ -185,25 +188,47 @@
 
       // 兼容渲染：通过代理取回 HTML，注入 <base> 后在本地 iframe 呈现
       async function proxyFetch(t, my) {
-        for (const make of PROXIES) {
+        for (let i = 0; i < PROXIES.length; i++) {
+          const make = PROXIES[i];
           const ctrl = new AbortController();
-          const timer = setTimeout(() => ctrl.abort(), 5000);
+          const timer = setTimeout(() => ctrl.abort(), 8000);
           try {
             const res = await fetch(make(t.url), { redirect: 'follow', signal: ctrl.signal });
             clearTimeout(timer);
             if (my !== renderSeq) return null;
-            if (res.ok) { const txt = await res.text(); if (txt && txt.length > 40) return txt; }
+            if (!res.ok) continue;
+            const txt = await res.text();
+            if (my !== renderSeq) return null;
+            if (!txt || txt.length < 40) continue;
+            // allorigins.win/get 返回 JSON 包装
+            let html = txt;
+            try {
+              const j = JSON.parse(txt);
+              if (j && typeof j.contents === 'string') html = j.contents;
+            } catch {}
+            if (html && html.length > 40) return html;
           } catch (e) { clearTimeout(timer); }
           if (my !== renderSeq) return null;
         }
         return null;
       }
-      function paintProxy(t, html, my) {
-        if (my !== renderSeq) return;
-        const base = '<base href="' + t.url.replace(/"/g, '%22') + '">';
+      // 清理 HTML：移除 CSP、frame-busting 脚本等阻碍嵌入的内容
+      function sanitizeHtml(html, url) {
         let doc = html;
+        // 移除 CSP meta 标签
+        doc = doc.replace(/<meta[^>]+http-equiv=["']content-security-policy["'][^>]*>/gi, '');
+        doc = doc.replace(/<meta[^>]+content=["'][^"']*frame-ancestors[^"']*["'][^>]*>/gi, '');
+        // 移除 X-Frame-Options 相关 meta
+        doc = doc.replace(/<meta[^>]+http-equiv=["']x-frame-options["'][^>]*>/gi, '');
+        // 注入 <base> 标签以正确解析相对路径
+        const base = '<base href="' + url.replace(/"/g, '%22') + '" target="_blank">';
         if (/<head[^>]*>/i.test(doc)) doc = doc.replace(/<head([^>]*)>/i, '<head$1>' + base);
         else doc = '<!DOCTYPE html><html><head>' + base + '</head><body>' + doc + '</body></html>';
+        return doc;
+      }
+      function paintProxy(t, html, my) {
+        if (my !== renderSeq) return;
+        const doc = sanitizeHtml(html, t.url);
         const frame = el('iframe');
         frame.setAttribute('sandbox', SANDBOX);
         frame.srcdoc = doc;

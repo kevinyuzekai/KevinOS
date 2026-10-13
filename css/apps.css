@@ -277,6 +277,54 @@
 .store-card .sc-info { flex: 1; min-width: 0; }
 .store-card .sc-name { font-size: 14px; font-weight: 600; }
 .store-card .sc-desc { font-size: 12px; color: var(--text-dim); margin-top: 3px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.store-tabs { display: flex; gap: 4px; padding: 12px 24px 0; border-bottom: 1px solid var(--stroke); }
+.store-tab { padding: 8px 16px; border-radius: 8px 8px 0 0; background: transparent; border: none; color: var(--text-dim); font-size: 13px; cursor: pointer; transition: all .15s; }
+.store-tab:hover { color: var(--text); }
+.store-tab.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.sc-tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); margin-top: 6px; font-weight: 600; }
+.sc-tag.system { background: var(--stroke); color: var(--text-dim); }
+.sc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.store-empty { grid-column: 1 / -1; text-align: center; color: var(--text-dim); padding: 60px 0; font-size: 14px; }
+
+/* ===== 画板 ===== */
+.paint-root { background: var(--surface-solid); }
+.paint-toolbar { display: flex; align-items: center; gap: 14px; padding: 10px 16px; background: var(--surface-2); border-bottom: 1px solid var(--stroke); flex-wrap: wrap; }
+.paint-colors { display: flex; gap: 6px; }
+.paint-color { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--stroke); cursor: pointer; transition: transform .15s; }
+.paint-color:hover { transform: scale(1.15); }
+.paint-color.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.paint-size { width: 100px; }
+.paint-size-label { font-size: 12px; color: var(--text-dim); min-width: 36px; }
+.paint-canvas { flex: 1; background: #fff; cursor: crosshair; touch-action: none; }
+
+/* ===== 待办 ===== */
+.todo-root { background: var(--surface-solid); }
+.todo-header { padding: 20px 24px 12px; }
+.todo-header h2 { font-size: 20px; font-weight: 600; }
+.todo-list { flex: 1; overflow-y: auto; padding: 0 24px; }
+.todo-empty { text-align: center; color: var(--text-dim); padding: 60px 0; font-size: 14px; }
+.todo-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); margin-bottom: 8px; transition: background .15s; }
+.todo-item:hover { background: var(--surface-3, var(--surface-2)); }
+.todo-item.done .todo-text { text-decoration: line-through; color: var(--text-dim); }
+.todo-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+.todo-text { flex: 1; font-size: 14px; }
+.todo-del { width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent; color: var(--text-dim); font-size: 18px; cursor: pointer; transition: all .15s; }
+.todo-del:hover { background: var(--danger-soft, rgba(239,68,68,.15)); color: var(--danger); }
+.todo-input-row { padding: 16px 24px; border-top: 1px solid var(--stroke); }
+.todo-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--surface-2); color: var(--text); font-size: 14px; outline: none; transition: border-color .15s; }
+.todo-input:focus { border-color: var(--accent); }
+
+/* ===== 时钟 ===== */
+.clock-root { background: var(--surface-solid); }
+.clock-tabs { display: flex; gap: 4px; padding: 12px 24px 0; border-bottom: 1px solid var(--stroke); }
+.clock-tab { padding: 8px 20px; border-radius: 8px 8px 0 0; background: transparent; border: none; color: var(--text-dim); font-size: 13px; cursor: pointer; }
+.clock-tab.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.clock-view { flex: 1; overflow-y: auto; }
+.clock-face { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 60px 24px; min-height: 100%; }
+.clock-time { font-size: 56px; font-weight: 200; font-family: 'SF Mono', 'Menlo', monospace; letter-spacing: 2px; color: var(--text); font-variant-numeric: tabular-nums; }
+.clock-date { font-size: 16px; color: var(--text-dim); }
+.clock-btns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.clock-num { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--stroke); background: var(--surface-2); color: var(--text); font-size: 14px; text-align: center; }
 
 /* ============ 天气 ============ */
 .wx { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; color: #fff; overflow: hidden; transition: background .5s var(--ease); }

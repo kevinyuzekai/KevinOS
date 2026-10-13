@@ -35,12 +35,37 @@
 
   /* ---------------- 应用注册 ---------------- */
   const apps = new Map();
+  const INSTALLED_KEY = 'kevinos-installed-apps';
+
+  function getInstalled() {
+    try { return JSON.parse(localStorage.getItem(INSTALLED_KEY)) || {}; } catch { return {}; }
+  }
+  function setInstalled(map) { localStorage.setItem(INSTALLED_KEY, JSON.stringify(map)); }
 
   function registerApp(def) {
-    apps.set(def.id, Object.assign({ pinned: false, category: '其他' }, def));
+    apps.set(def.id, Object.assign({ pinned: false, category: '其他', installable: false }, def));
   }
   function getApp(id) { return apps.get(id); }
   function allApps() { return Array.from(apps.values()); }
+  function isInstalled(id) {
+    const app = apps.get(id);
+    if (!app) return false;
+    if (!app.installable) return true;
+    return !!getInstalled()[id];
+  }
+  function installApp(id) {
+    const map = getInstalled();
+    map[id] = true;
+    setInstalled(map);
+    window.dispatchEvent(new CustomEvent('kevinos:apps-changed', { detail: { id, action: 'install' } }));
+  }
+  function uninstallApp(id) {
+    const map = getInstalled();
+    delete map[id];
+    setInstalled(map);
+    window.dispatchEvent(new CustomEvent('kevinos:apps-changed', { detail: { id, action: 'uninstall' } }));
+  }
+  function installedApps() { return allApps().filter(a => isInstalled(a.id)); }
 
   /* ---------------- 应用图标渲染 ---------------- */
   function appIconEl(app, cls) {
@@ -95,7 +120,7 @@
   }
 
   K.ICONS = ICONS;
-  K.apps = { registerApp, getApp, allApps, appIconEl, iconEl };
+  K.apps = { registerApp, getApp, allApps, appIconEl, iconEl, isInstalled, installApp, uninstallApp, installedApps };
   K.registerApp = registerApp;
   K.util = { el, svgIcon, fmtSize, fmtTime };
 })();

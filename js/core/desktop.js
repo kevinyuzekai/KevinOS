@@ -188,9 +188,9 @@
       if (!seen.has(win.appId)) { seen.add(win.appId); running.push(win.appId); }
     });
 
-    // 固定应用 + 运行中的非固定应用
-    const ids = [...DOCK_PINNED];
-    running.forEach(id => { if (!ids.includes(id)) ids.push(id); });
+    // 固定应用（仅已安装）+ 运行中的非固定应用
+    const ids = DOCK_PINNED.filter(id => K.apps.isInstalled(id));
+    running.forEach(id => { if (!ids.includes(id) && K.apps.isInstalled(id)) ids.push(id); });
 
     ids.forEach(appId => {
       const app = K.apps.getApp(appId);
@@ -392,7 +392,7 @@
     const pagesEl = document.getElementById('lp-pages');
     track.innerHTML = ''; pagesEl.innerHTML = '';
 
-    const apps = K.apps.allApps().filter(a =>
+    const apps = K.apps.installedApps().filter(a =>
       !q || a.name.toLowerCase().includes(q) || a.id.includes(q) || (a.category || '').toLowerCase().includes(q)
     ).sort(lpSort);
 
@@ -465,7 +465,7 @@
     panel.hidden = false; requestAnimationFrame(() => panel.classList.add('open'));
     panel.style.bottom = '74px';
 
-    const apps = K.apps.allApps().filter(a => a.name.toLowerCase().includes(q) || a.id.includes(q));
+    const apps = K.apps.installedApps().filter(a => a.name.toLowerCase().includes(q) || a.id.includes(q));
     // 文件搜索
     const files = [];
     (function walk(path) {
@@ -770,6 +770,7 @@
 
     K.bus.on('window:change', () => { renderDock(); updateMenubarApp(); });
     K.bus.on('window:focus', () => { renderDock(); updateMenubarApp(); });
+    window.addEventListener('kevinos:apps-changed', () => { renderDock(); });
     FS.onChange(renderDesktopIcons);
 
     renderDesktopIcons();
