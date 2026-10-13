@@ -22,14 +22,16 @@
 /* 只有 Aurora 材质允许窗口半透明。
  * 自动模式（auto）在深色下等价于 Aurora，所以用 :is() 把两种情形一起写，
  * 否则浅色→深色切换时窗口不会跟着变。 */
+/* 极光下窗口是半透明玻璃，必须有 1px 描边才有边界（实心材质不要一起加，验收 F6） */
 html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .window {
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--saturate));
   backdrop-filter: blur(var(--blur-strong)) saturate(var(--saturate));
-  box-shadow: var(--outline-window), var(--shadow-4);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-edge), var(--shadow-4), var(--glass-glow);
 }
 html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .window.focused {
-  box-shadow: var(--outline-window), var(--shadow-window);
+  box-shadow: var(--glass-edge), var(--shadow-window), var(--glass-glow);
 }
 
 /* 打开 / 关闭 / 最小化动画 —— 280ms，只有"出现"用 spring */
@@ -152,6 +154,6 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .wi
 .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
 .btn.primary:hover { background: var(--accent-hover); }
 .btn.primary:active { background: var(--accent-active); }
-.btn.danger { background: var(--danger); color: var(--accent-fg); border-color: transparent; }
+.btn.danger { background: var(--danger-solid); color: var(--danger-on-solid); border-color: transparent; }
 .btn.ghost { background: transparent; }
 .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }

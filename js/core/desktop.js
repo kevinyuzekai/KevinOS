@@ -22,7 +22,7 @@
   function toast(n) {
     const stack = document.getElementById('toast-stack');
     const app = n.app ? K.apps.getApp(n.app) : null;
-    const grad = app ? app.gradient : ['#4f7cff', '#7aa2ff'];
+    const grad = app ? app.gradient : ['#2C5AE0', '#4F7CFF'];
     const t = el('div', { class: 'toast' }, [
       el('div', { class: 't-ico', style: { background: `linear-gradient(145deg,${grad[0]},${grad[1]})` }, html: `<svg viewBox="0 0 24 24" class="ico">${K.ICONS[app ? app.icon : (n.icon || 'info')] || K.ICONS.info}</svg>` }),
       el('div', {}, [el('div', { class: 't-title', text: n.title }), n.body ? el('div', { class: 't-body', text: n.body }) : null])
@@ -122,7 +122,7 @@
       if (node.type === 'folder') {
         imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#ffc24b,#ff9d2e)"><svg viewBox="0 0 24 24">${K.ICONS.files}</svg></span>`;
       } else {
-        imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24">${K.ICONS.editor}</svg></span>`;
+        imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#56648A,#8A98B8)"><svg viewBox="0 0 24 24">${K.ICONS.editor}</svg></span>`;
       }
       wrap.append(imgWrap, el('div', { class: 'di-label', text: node.name }));
 
@@ -502,7 +502,7 @@
     });
     files.slice(0, 12).forEach(f => {
       const it = el('div', { class: 'start-app' }, [
-        el('span', { class: 'app-ico', style: { background: 'linear-gradient(145deg,#64748b,#94a3b8)' }, html: `<svg viewBox="0 0 24 24">${K.ICONS.editor}</svg>` }),
+        el('span', { class: 'app-ico', style: { background: 'linear-gradient(145deg,#56648A,#8A98B8)' }, html: `<svg viewBox="0 0 24 24">${K.ICONS.editor}</svg>` }),
         el('div', { class: 'sa-name', text: f.node.name })
       ]);
       it.addEventListener('click', () => {

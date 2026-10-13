@@ -1,5 +1,5 @@
 /* ===== KevinOS · Theme tokens & Boot =====
- * 令牌层唯一事实来源：Pixel《设计规范 v2.1》定稿（design/tokens.css，2026-10-14 00:28 版）。
+ * 令牌层唯一事实来源：Pixel《设计规范 v2.1》定稿（design/tokens.css，2026-10-14 00:5x 版）。
  * 方向 A 深海（磨砂）为默认材质，方向 B 极光用于深色/可选。
  * data-material 三档：auto（默认，浅色磨砂 / 深色自动极光）/ frost / aurora。
  * data-wall 二档：dark | light —— 桌面图标标签跟随"壁纸明度"，不跟随主题（验收 S1）。
@@ -54,6 +54,14 @@
   --purple-soft:  #F0E9FE;
   --info:         #0E7490;
   --info-soft:    #E0F2F7;
+
+  /* 实心语义按钮：**底** 与 **其上的文字** 必须成对，不能拿 --danger 配 --accent-fg（白）。
+   * 原因：--danger/--success/--warning 在深色下是「亮色」（为深底上的文字优化），
+   * 拿它们当实心底 + 白字会翻车 —— 实测深色 danger #F87171 + 白 = 2.77:1，success 1.92，warning 1.67。
+   * 规则：浅色 = 深底 + 白字；深色 = 亮底 + 深字（--navy-950 系的 ink）。见《规范 §3.13》。 */
+  --danger-solid:  #B42318;   --danger-on-solid:  #FFFFFF;   /* 6.57 ✓ */
+  --success-solid: #0A7A50;   --success-on-solid: #FFFFFF;   /* 5.37 ✓ */
+  --warning-solid: #B45309;   --warning-on-solid: #FFFFFF;   /* 5.02 ✓ */
 
   /* ---------------------------------------------------------------
    * 3. 表面与文字（浅色主题）
@@ -316,6 +324,11 @@ html[data-theme="dark"] {
   --danger:       #F87171;  --danger-soft:  rgba(248, 113, 113, 0.16);
   --purple:       #A78BFA;  --purple-soft:  rgba(167, 139, 250, 0.16);
   --info:         #38BDF8;  --info-soft:    rgba(56, 189, 248, 0.16);
+
+  /* 深色下换成亮底 + 深字（白字全部不达标，见 :root 注释） */
+  --danger-solid:  #F87171;   --danger-on-solid:  #0F1A2E;   /* 6.29 ✓ */
+  --success-solid: #34D399;   --success-on-solid: #0F1A2E;   /* 8.68 ✓ */
+  --warning-solid: #FBBF24;   --warning-on-solid: #0F1A2E;   /* 10.07 ✓ */
 
   --bg:             var(--navy-900);   /* #0A0F1C */
   --bg-sunken:      #070B16;

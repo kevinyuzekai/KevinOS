@@ -71,7 +71,7 @@
   function appIconEl(app, cls) {
     const el = document.createElement('div');
     el.className = 'app-ico ' + (cls || '');
-    const g = app.gradient || ['#4f7cff', '#7aa2ff'];
+    const g = app.gradient || ['#2C5AE0', '#4F7CFF'];
     el.style.background = `linear-gradient(145deg, ${g[0]}, ${g[1]})`;
     el.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[app.icon] || ICONS.about}</svg>`;
     return el;
@@ -79,7 +79,7 @@
   function iconEl(name, color) {
     const span = document.createElement('span');
     span.className = 'app-ico sm';
-    span.style.background = color || 'linear-gradient(145deg,#4f7cff,#7aa2ff)';
+    span.style.background = color || 'linear-gradient(145deg,#2C5AE0,#4F7CFF)';
     span.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[name] || ICONS.about}</svg>`;
     return span;
   }
