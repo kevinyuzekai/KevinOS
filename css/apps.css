@@ -460,3 +460,26 @@
 .ai-settings { width: 460px; max-width: 90%; max-height: 88%; overflow-y: auto; background: var(--surface-1); border-radius: 16px; padding: 20px 22px; box-shadow: 0 24px 60px -16px rgba(0,0,0,.5); }
 .ai-input-field { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--stroke); background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box; }
 .ai-input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* Agent 模式开关 */
+.ai-agent-toggle {
+  border: 1px solid var(--stroke); background: var(--surface-2);
+  color: var(--text-dim); font-size: 12px; padding: 5px 12px; border-radius: 8px;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.ai-agent-toggle:hover { color: var(--text); }
+.ai-agent-toggle.on {
+  background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border-color: transparent;
+  box-shadow: 0 2px 10px -3px rgba(124,58,237,.5);
+}
+
+/* 工具调用展示 */
+.ai-tools { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+.ai-tool-call {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 11px; border-radius: 8px;
+  background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2);
+  font-size: 12px; max-width: 100%;
+}
+.ai-tool-name { color: #a855f7; font-weight: 600; flex-shrink: 0; }
+.ai-tool-args { color: var(--text-dim); font-family: monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
