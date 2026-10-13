@@ -1,5 +1,5 @@
 /* ============================================================
- * KevinOS · KevinOffice 办公套件
+ * KevinOS · KOffice 办公套件
  * 文字（Word）/ 表格（Excel）/ 演示（PPT）/ PDF 四大模块
  * 零依赖，纯前端实现，可保存到虚拟文件系统
  * ============================================================ */
@@ -78,7 +78,7 @@
    * 应用注册
    * ============================================================ */
   K.registerApp({
-    id: 'office', name: 'KevinOffice', icon: 'office',
+    id: 'office', name: 'KOffice', icon: 'office',
     gradient: ['#e2483d', '#f5732c'], pinned: true, category: '办公',
     size: { w: 1100, h: 720 },
     mount(win, args) {
@@ -125,7 +125,7 @@
       function markDirty() { const d = activeDoc(); if (d) { d.dirty = true; renderTabs(); updateTitle(); } }
       function updateTitle() {
         const d = activeDoc();
-        win.setTitle('KevinOffice' + (d ? ' — ' + d.name + (d.dirty ? ' •' : '') : ''));
+        win.setTitle('KOffice' + (d ? ' — ' + d.name + (d.dirty ? ' •' : '') : ''));
       }
 
       /* ---------- 保存 / 导出 ---------- */
@@ -142,7 +142,7 @@
         if (!r.ok) { K.WM.UI.alert(r.error || '保存失败'); return; }
         d.name = name.replace(/\.[^.]+$/, ''); d.dirty = false;
         renderTabs(); updateTitle();
-        K.desktop.notify({ title: 'KevinOffice', body: '已保存：' + name, icon: 'office' });
+        K.desktop.notify({ title: 'KOffice', body: '已保存：' + name, icon: 'office' });
       }
       function exportDoc() {
         const d = activeDoc(); if (!d) return; syncActive();
@@ -235,7 +235,7 @@
           { label: '放大预览 (PPT 放映)', act: presentSlides }
         ],
         '帮助': [
-          { label: '关于 KevinOffice', act: () => K.WM.UI.alert('KevinOffice 内置文字处理、电子表格、演示文稿与 PDF 阅读四大模块，支持公式计算、保存到虚拟文件系统与导出下载。', '关于 KevinOffice') }
+          { label: '关于 KOffice', act: () => K.WM.UI.alert('KOffice 内置文字处理、电子表格、演示文稿与 PDF 阅读四大模块，支持公式计算、保存到虚拟文件系统与导出下载。', '关于 KOffice') }
         ]
       };
       let openMenu = null;
@@ -259,7 +259,7 @@
           });
           menubar.appendChild(wrap);
         });
-        menubar.appendChild(el('div', { class: 'of-menubar-brand', text: 'KevinOffice' }));
+        menubar.appendChild(el('div', { class: 'of-menubar-brand', text: 'KOffice' }));
       }
       win.body.addEventListener('click', () => { menubar.querySelectorAll('.of-menu-drop').forEach(d => d.hidden = true); });
 
@@ -329,7 +329,7 @@
         wrap.appendChild(el('div', { class: 'of-home-head' }, [
           el('img', { src: 'assets/logo.png', class: 'of-home-logo' }),
           el('div', {}, [
-            el('h1', { text: 'KevinOffice' }),
+            el('h1', { text: 'KOffice' }),
             el('p', { text: '选择一种文档类型开始创作，所有内容都在本地处理。' })
           ])
         ]));
@@ -657,7 +657,7 @@
         const d = activeDoc();
         const label = { doc: '文字文档', sheet: '电子表格', slide: '演示文稿', pdf: 'PDF 文档' }[d ? d.type : ''] || '就绪';
         status.append(
-          el('span', { class: 'of-status-item', text: 'KevinOffice' }),
+          el('span', { class: 'of-status-item', text: 'KOffice' }),
           el('span', { class: 'of-status-item', text: label }),
           el('span', { class: 'of-status-spacer' }),
           el('span', { class: 'of-status-item', text: d ? (d.dirty ? '未保存' : '已保存') : '' })
