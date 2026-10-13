@@ -304,12 +304,12 @@
 .todo-list { flex: 1; overflow-y: auto; padding: 0 24px; }
 .todo-empty { text-align: center; color: var(--text-dim); padding: 60px 0; font-size: 14px; }
 .todo-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); margin-bottom: 8px; transition: background .15s; }
-.todo-item:hover { background: var(--surface-3, var(--surface-2)); }
+.todo-item:hover { background: var(--surface-sunken); }
 .todo-item.done .todo-text { text-decoration: line-through; color: var(--text-dim); }
 .todo-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
 .todo-text { flex: 1; font-size: 14px; }
 .todo-del { width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent; color: var(--text-dim); font-size: 18px; cursor: pointer; transition: all .15s; }
-.todo-del:hover { background: var(--danger-soft, rgba(239,68,68,.15)); color: var(--danger); }
+.todo-del:hover { background: var(--danger-soft); color: var(--danger); }
 .todo-input-row { padding: 16px 24px; border-top: 1px solid var(--stroke); }
 .todo-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--surface-2); color: var(--text); font-size: 14px; outline: none; transition: border-color .15s; }
 .todo-input:focus { border-color: var(--accent); }
@@ -338,7 +338,7 @@
 .music-idx { width: 24px; text-align: center; color: var(--text-dim); font-size: 12px; }
 .music-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .music-del { width: 24px; height: 24px; border-radius: 50%; border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 16px; }
-.music-del:hover { background: var(--danger-soft, rgba(239,68,68,.15)); color: var(--danger); }
+.music-del:hover { background: var(--danger-soft); color: var(--danger); }
 .music-player { padding: 16px 20px; border-top: 1px solid var(--stroke); background: var(--surface-2); }
 .music-now { margin-bottom: 12px; }
 .music-title { font-size: 15px; font-weight: 600; }
@@ -590,7 +590,7 @@
 
 /* ================= AI 助手 ================= */
 .ai-root { height: 100%; }
-.ai-side { width: 230px; border-right: 1px solid var(--stroke); display: flex; flex-direction: column; background: var(--surface-1); }
+.ai-side { width: var(--w-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--surface-sunken); }
 .ai-new-btn { display: flex; align-items: center; gap: 8px; margin: 12px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--surface-2); cursor: pointer; font-size: 13px; color: var(--text); transition: background .15s; }
 .ai-new-btn:hover { background: var(--accent-soft); color: var(--accent); }
 .ai-new-btn svg { width: 16px; height: 16px; fill: currentColor; }
@@ -635,7 +635,7 @@
 .ai-stop:hover { background: var(--accent-soft); color: var(--accent); }
 
 .ai-settings-mask { position: absolute; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 10; backdrop-filter: blur(2px); }
-.ai-settings { width: 460px; max-width: 90%; max-height: 88%; overflow-y: auto; background: var(--surface-1); border-radius: 16px; padding: 20px 22px; box-shadow: 0 24px 60px -16px rgba(0,0,0,.5); }
+.ai-settings { width: 460px; max-width: 90%; max-height: 88%; overflow-y: auto; background: var(--surface-raised); border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: 0 24px 60px -16px rgba(0,0,0,.5); }
 .ai-input-field { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--stroke); background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit; outline: none; box-sizing: border-box; }
 .ai-input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
