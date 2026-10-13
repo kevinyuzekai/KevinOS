@@ -60,28 +60,23 @@
 
 <!-- ================= 开机动画 ================= -->
 <div id="boot-screen" class="boot-screen">
-  <div class="boot-terminal">
-    <div class="boot-topbar">
-      <div class="boot-brand">
-        <img src="assets/logo.png" alt="K" class="boot-brand-logo" />
-        <span class="boot-brand-name">KevinOS</span>
-      </div>
-      <div class="boot-loading">
-        <span class="boot-spinner"></span>
-        <span class="boot-loading-text">BOOTING SYSTEM</span>
-      </div>
+  <div class="boot-center">
+    <div class="boot-logo-area">
+      <img src="assets/logo.png" alt="K" class="boot-logo" />
+      <div class="boot-title">KevinOS</div>
+      <div class="boot-subtitle">A Web-Based Desktop Experience</div>
     </div>
-    <div class="boot-logs" id="boot-logs"></div>
-    <div class="boot-ascii-box">
-      <pre class="boot-ascii">██╗  ██╗███████╗██╗   ██╗██╗███╗   ██╗     ██████╗ ███████╗
+    <div class="boot-ascii" id="boot-ascii">██╗  ██╗███████╗██╗   ██╗██╗███╗   ██╗     ██████╗ ███████╗
 ██║ ██╔╝██╔════╝██║   ██║██║████╗  ██║    ██╔═══██╗██╔════╝
 █████╔╝ █████╗  ██║   ██║██║██╔██╗ ██║    ██║   ██║███████╗
 ██╔═██╗ ██╔══╝  ╚██╗ ██╔╝██║██║╚██╗██║    ██║   ██║╚════██║
 ██║  ██╗███████╗ ╚████╔╝ ██║██║ ╚████║    ╚██████╔╝███████║
-╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝╚═╝  ╚═══╝     ╚═════╝ ╚══════╝</pre>
+╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝╚═╝  ╚═══╝     ╚═════╝ ╚══════╝</div>
+    <div class="boot-logs" id="boot-logs"></div>
+    <div class="boot-progress">
+      <div class="boot-progress-bar" id="boot-progress-bar"></div>
     </div>
-    <div class="boot-logs2" id="boot-logs2"></div>
-    <div class="boot-cta">KEVINOS · A WEB-BASED DESKTOP EXPERIENCE</div>
+    <div class="boot-version">v1.0.0</div>
   </div>
 </div>
 
@@ -255,6 +250,6 @@
 <script src="js/apps/office.js"></script>
 <script src="js/apps/ai.js"></script>
 <script src="js/core/desktop.js"></script>
-<script src="js/core/system.js?v=5"></script>
+<script src="js/core/system.js?v=6"></script>
 </body>
 </html>

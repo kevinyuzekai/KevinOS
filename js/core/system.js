@@ -210,14 +210,12 @@
     });
   }
 
-  /* ---------------- 引导（终端风格） ---------------- */
-  const LOG_LINES_BEFORE = [
+  /* ---------------- 引导（居中终端风格） ---------------- */
+  const LOG_LINES = [
     'INITIALIZING KERNEL',
     'LOADING DEVICE DRIVERS',
     'MOUNTING VIRTUAL FILESYSTEM',
-    'STARTING SYSTEM SERVICES'
-  ];
-  const LOG_LINES_AFTER = [
+    'STARTING SYSTEM SERVICES',
     'LOADING WINDOW MANAGER',
     'INITIALIZING DOCK',
     'APPLYING THEME & WALLPAPER',
@@ -229,13 +227,13 @@
     const p = n => String(n).padStart(2, '0');
     return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
   }
-  function addLogLine(containerId, msg, delay) {
+  function addLogLine(msg, delay) {
     setTimeout(() => {
-      const box = document.getElementById(containerId);
+      const box = document.getElementById('boot-logs');
       if (!box) return;
       const line = document.createElement('div');
       line.className = 'boot-log-line';
-      line.innerHTML = '<span class="boot-log-time">' + fmtTime(new Date()) + '</span><span class="boot-log-msg">' + msg + ' ...</span>';
+      line.innerHTML = '<span class="boot-log-time">' + fmtTime(new Date()) + '</span><span class="boot-log-msg">' + msg + '</span>';
       box.appendChild(line);
     }, delay);
   }
@@ -244,15 +242,24 @@
   function boot() {
     if (booted) return; booted = true;
     const start = Date.now();
-    const DURATION = 6000;
+    const DURATION = 8000;
+    const LOG_INTERVAL = 700;
 
     // 逐条输出日志
-    LOG_LINES_BEFORE.forEach((msg, i) => addLogLine('boot-logs', msg, i * 400));
-    LOG_LINES_AFTER.forEach((msg, i) => addLogLine('boot-logs2', msg, 1800 + i * 400));
+    LOG_LINES.forEach((msg, i) => addLogLine(msg, i * LOG_INTERVAL));
+
+    // 进度条
+    const progressBar = document.getElementById('boot-progress-bar');
+    const progTimer = setInterval(() => {
+      const pct = Math.min(100, ((Date.now() - start) / DURATION) * 100);
+      if (progressBar) progressBar.style.width = pct + '%';
+      if (pct >= 100) clearInterval(progTimer);
+    }, 50);
 
     const timer = setInterval(() => {
       if (Date.now() - start >= DURATION) {
         clearInterval(timer);
+        clearInterval(progTimer);
         setTimeout(finishBoot, 300);
       }
     }, 100);
