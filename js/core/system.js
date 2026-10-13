@@ -210,29 +210,48 @@
     });
   }
 
-  /* ---------------- 引导 ---------------- */
-  const BOOT_STEPS = [
-    { at: 0, text: 'STARTING' },
-    { at: 25, text: 'INITIALIZING' },
-    { at: 50, text: 'LOADING SERVICES' },
-    { at: 75, text: 'PREPARING DESKTOP' },
-    { at: 100, text: '' }
+  /* ---------------- 引导（Render 终端风格） ---------------- */
+  const LOG_LINES_BEFORE = [
+    'INCOMING SYSTEM REQUEST DETECTED',
+    'SERVICE WAKING UP',
+    'ALLOCATING COMPUTE RESOURCES'
   ];
+  const LOG_LINES_AFTER = [
+    'PREPARING INSTANCE FOR INITIALIZATION',
+    'LOADING KERNEL MODULES',
+    'MOUNTING VIRTUAL FILESYSTEM',
+    'STARTING DESKTOP ENVIRONMENT'
+  ];
+
+  function fmtTime(d) {
+    const p = n => String(n).padStart(2, '0');
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function addLogLine(containerId, msg, delay) {
+    setTimeout(() => {
+      const box = document.getElementById(containerId);
+      if (!box) return;
+      const line = document.createElement('div');
+      line.className = 'boot-log-line';
+      line.innerHTML = '<span class="boot-log-time">' + fmtTime(new Date()) + '</span><span class="boot-log-msg">' + msg + ' ...</span>';
+      box.appendChild(line);
+    }, delay);
+  }
 
   let booted = false;
   function boot() {
     if (booted) return; booted = true;
-    const status = document.getElementById('boot-status');
     const start = Date.now();
-    const DURATION = 1800;
+    const DURATION = 2600;
+
+    // 逐条输出日志
+    LOG_LINES_BEFORE.forEach((msg, i) => addLogLine('boot-logs', msg, i * 350));
+    LOG_LINES_AFTER.forEach((msg, i) => addLogLine('boot-logs2', msg, 900 + i * 350));
+
     const timer = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const pct = Math.min(100, (elapsed / DURATION) * 100);
-      const step = BOOT_STEPS.filter(s => s.at <= pct).pop();
-      if (step && status) status.textContent = step.text;
-      if (pct >= 100) {
+      if (Date.now() - start >= DURATION) {
         clearInterval(timer);
-        setTimeout(finishBoot, 300);
+        setTimeout(finishBoot, 200);
       }
     }, 100);
   }
@@ -253,7 +272,7 @@
       bootEl.remove();
       K.desktop.notify({ title: '欢迎使用 KevinOS', body: '点击底部 Dock 或左上角 Kevin 菜单探索系统。', icon: 'about' });
       K.desktop.notify({ title: '小提示', body: '拖动窗口到屏幕边缘可以自动分屏；右键桌面可新建文件与文件夹。', silent: false });
-    }, 680);
+    }, 520);
   }
 
   K.system = {

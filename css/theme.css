@@ -76,71 +76,113 @@ html[data-accent="orange"] { --accent: #ff8a3d; --accent-2: #ffb37a; --accent-so
   border: 1px solid var(--stroke);
 }
 
-/* ============ 开机动画（Render 风格 · 纯黑极简） ============ */
+/* ============ 开机动画（Render 终端风格） ============ */
 .boot-screen {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  display: grid;
-  place-items: center;
-  background: #000;
-  color: #fff;
-  transition: opacity .6s ease, transform .6s ease;
+  background: #0c0c0e;
+  color: #c8c8c8;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
+  transition: opacity .5s ease, transform .5s ease;
+  overflow: hidden;
 }
-.boot-screen::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(50% 40% at 50% 45%, rgba(79,124,255,.06), transparent 70%);
-  pointer-events: none;
+.boot-screen.leaving { opacity: 0; transform: scale(1.01); pointer-events: none; }
+.boot-terminal {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 40px;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
-.boot-screen.leaving { opacity: 0; transform: scale(1.02); pointer-events: none; }
-.boot-inner {
-  position: relative;
-  display: flex; flex-direction: column; align-items: center; gap: 28px;
+
+/* 顶部栏 */
+.boot-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
 }
-.boot-logo-wrap {
-  position: relative;
-  width: 120px; height: 120px;
-  display: grid; place-items: center;
-  animation: logoBreathe 2.4s ease-in-out infinite;
+.boot-brand { display: flex; align-items: center; gap: 12px; }
+.boot-brand-logo {
+  width: 32px; height: 32px; border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.06);
 }
-@keyframes logoBreathe {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px rgba(79,124,255,.25)); }
-  50% { transform: scale(1.04); filter: drop-shadow(0 0 32px rgba(79,124,255,.45)); }
+.boot-brand-name {
+  font-size: 20px; font-weight: 500; color: #e8e8e8;
+  letter-spacing: 0.5px;
 }
-.boot-logo {
-  width: 76px; height: 76px;
-  border-radius: 20px;
-  animation: logoIn .8s ease both;
+.boot-loading { display: flex; align-items: center; gap: 12px; }
+.boot-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.12);
+  border-top-color: #6b8cff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
-@keyframes logoIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
-.boot-title {
-  font-size: 22px; font-weight: 300; letter-spacing: 4px;
-  color: rgba(255,255,255,.82);
-  animation: fadeUp .7s ease both .12s;
+@keyframes spin { to { transform: rotate(360deg); } }
+.boot-loading-text {
+  font-size: 13px; color: #888; letter-spacing: 2px; font-weight: 400;
 }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-.boot-loader {
-  display: flex; gap: 6px; align-items: center;
-  height: 10px;
-  animation: fadeUp .7s ease both .24s;
+
+/* 日志行 */
+.boot-logs, .boot-logs2 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-.boot-loader span {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: rgba(255,255,255,.5);
-  animation: dotPulse 1.3s ease-in-out infinite;
+.boot-log-line {
+  font-size: 13px;
+  color: #6a6a6a;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: logLineIn .3s ease both;
 }
-.boot-loader span:nth-child(2) { animation-delay: .16s; }
-.boot-loader span:nth-child(3) { animation-delay: .32s; }
-@keyframes dotPulse {
-  0%, 80%, 100% { transform: scale(.6); opacity: .3; }
-  40% { transform: scale(1); opacity: .9; }
+.boot-log-time { color: #4a4a4a; margin-right: 10px; }
+.boot-log-msg { color: #8a8a8a; }
+@keyframes logLineIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
 }
-.boot-status {
-  font-size: 11px; font-weight: 400;
-  color: rgba(255,255,255,.28);
-  min-height: 14px; letter-spacing: 1.5px; text-transform: uppercase;
-  animation: fadeUp .7s ease both .36s;
+
+/* ASCII 艺术字框 */
+.boot-ascii-box {
+  border: 1px dashed rgba(255,255,255,.12);
+  border-radius: 4px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: logLineIn .5s ease both .6s;
+}
+.boot-ascii {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.15;
+  color: #5a5a5a;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
+  white-space: pre;
+}
+
+/* 底部 CTA */
+.boot-cta {
+  margin-top: auto;
+  padding-bottom: 8px;
+  font-size: 14px;
+  color: #6b8cff;
+  letter-spacing: 1.5px;
+  font-weight: 500;
+  animation: logLineIn .5s ease both 1.2s;
+}
+
+@media (max-width: 600px) {
+  .boot-terminal { padding: 32px 20px; }
+  .boot-ascii { font-size: 7px; }
+  .boot-loading-text { display: none; }
 }
 
 /* 关机遮罩 */

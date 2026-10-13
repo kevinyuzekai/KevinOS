@@ -60,15 +60,28 @@
 
 <!-- ================= 开机动画 ================= -->
 <div id="boot-screen" class="boot-screen">
-  <div class="boot-inner">
-    <div class="boot-logo-wrap">
-      <img src="assets/logo.png" alt="KevinOS" class="boot-logo" />
+  <div class="boot-terminal">
+    <div class="boot-topbar">
+      <div class="boot-brand">
+        <img src="assets/logo.png" alt="K" class="boot-brand-logo" />
+        <span class="boot-brand-name">KevinOS</span>
+      </div>
+      <div class="boot-loading">
+        <span class="boot-spinner"></span>
+        <span class="boot-loading-text">SYSTEM LOADING</span>
+      </div>
     </div>
-    <div class="boot-title">KevinOS</div>
-    <div class="boot-loader">
-      <span></span><span></span><span></span>
+    <div class="boot-logs" id="boot-logs"></div>
+    <div class="boot-ascii-box">
+      <pre class="boot-ascii">██╗  ██╗███████╗██╗   ██╗██╗███╗   ██╗     ██████╗ ███████╗
+██║ ██╔╝██╔════╝██║   ██║██║████╗  ██║    ██╔═══██╗██╔════╝
+█████╔╝ █████╗  ██║   ██║██║██╔██╗ ██║    ██║   ██║███████╗
+██╔═██╗ ██╔══╝  ╚██╗ ██╔╝██║██║╚██╗██║    ██║   ██║╚════██║
+██║  ██╗███████╗ ╚████╔╝ ██║██║ ╚████║    ╚██████╔╝███████║
+╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝╚═╝  ╚═══╝     ╚═════╝ ╚══════╝</pre>
     </div>
-    <div class="boot-status" id="boot-status">正在启动…</div>
+    <div class="boot-logs2" id="boot-logs2"></div>
+    <div class="boot-cta">START EXPLORING KEVINOS TODAY →</div>
   </div>
 </div>
 
