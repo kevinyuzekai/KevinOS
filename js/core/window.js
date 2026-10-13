@@ -55,7 +55,7 @@
     const h = Math.min(size.h, wa.h - 40);
     const offset = windows.length * 26;
     const x = Math.max(20, Math.round((wa.w - w) / 2) + (offset % 120) - 60);
-    const y = Math.max(16, Math.round((wa.h - h) / 2) + (offset % 90) - 40);
+    const y = Math.max(wa.y + 16, wa.y + Math.round((wa.h - h) / 2) + (offset % 90) - 40);
 
     const winEl = el('div', { class: 'window anim-open' });
     winEl.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;`;
@@ -226,7 +226,7 @@
         const ratio = ev.clientX / window.innerWidth;
         s.w = p.w; s.h = p.h;
         ox = Math.round(ev.clientX - p.w * ratio);
-        oy = Math.max(0, ev.clientY - 20);
+        oy = Math.max(MENUBAR_H, ev.clientY - 20);
         s.maximized = false; wasMax = false;
         win.el.style.borderRadius = '';
         startX = ev.clientX; startY = ev.clientY;
@@ -242,9 +242,9 @@
       // 吸附探测
       const wa = workArea();
       snap = null;
-      if (ev.clientY <= SNAP_EDGE) snap = { x: 0, y: 0, w: wa.w, h: wa.h };
-      else if (ev.clientX <= SNAP_EDGE) snap = { x: 0, y: 0, w: wa.w / 2, h: wa.h };
-      else if (ev.clientX >= window.innerWidth - SNAP_EDGE) snap = { x: wa.w / 2, y: 0, w: wa.w / 2, h: wa.h };
+      if (ev.clientY <= SNAP_EDGE) snap = { x: 0, y: wa.y, w: wa.w, h: wa.h };
+      else if (ev.clientX <= SNAP_EDGE) snap = { x: 0, y: wa.y, w: wa.w / 2, h: wa.h };
+      else if (ev.clientX >= window.innerWidth - SNAP_EDGE) snap = { x: wa.w / 2, y: wa.y, w: wa.w / 2, h: wa.h };
       showSnap(snap);
     }
     function up() {
@@ -268,7 +268,7 @@
     function wa_h() { return workArea().h; }
     function toggleMaxIfNeeded(w) {
       w.state.prev = { x: ox, y: oy, w: w.state.w, h: w.state.h };
-      Object.assign(w.state, { x: 0, y: 0, w: wa_w(), h: wa_h(), maximized: true });
+      Object.assign(w.state, { x: 0, y: workArea().y, w: wa_w(), h: wa_h(), maximized: true });
       w.el.classList.add('anim-max');
       apply(w);
     }
@@ -301,10 +301,10 @@
       if (dir.includes('s')) h = Math.max(minH, o.h + dy);
       if (dir.includes('w')) { w = Math.max(minW, o.w - dx); x = o.x + (o.w - w); }
       if (dir.includes('n')) { h = Math.max(minH, o.h - dy); y = o.y + (o.h - h); }
-      if (y < 0) { h += y; y = 0; }
+      if (y < MENUBAR_H) { h += y - MENUBAR_H; y = MENUBAR_H; }
       if (x < 0) { w += x; x = 0; }
       if (x + w > wa.w) w = wa.w - x;
-      if (y + h > wa.h) h = wa.h - y;
+      if (y + h > wa.y + wa.h) h = wa.y + wa.h - y;
       Object.assign(s, { x, y, w, h, maximized: false });
       win.el.classList.add('resizing');
       apply(win);
