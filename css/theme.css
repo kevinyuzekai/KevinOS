@@ -126,6 +126,38 @@ html[data-accent="orange"] { --accent: #ff8a3d; --accent-2: #ffb37a; --accent-so
 .shutdown-veil.show { opacity: 1; pointer-events: auto; }
 .shutdown-veil .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,.15); border-top-color: var(--accent); animation: spin .9s linear infinite; }
 
+/* 睡眠 / 屏保 */
+.sleep-screen {
+  position: fixed; inset: 0; z-index: 9997;
+  opacity: 0; pointer-events: none;
+  transition: opacity .5s var(--ease);
+  overflow: hidden;
+}
+.sleep-screen.show { opacity: 1; pointer-events: auto; }
+.sleep-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(.55); }
+.sleep-content {
+  position: relative; z-index: 1;
+  height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,.4);
+}
+.sleep-time {
+  font-size: clamp(80px, 18vw, 220px);
+  font-weight: 200; letter-spacing: -.04em;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.sleep-date {
+  font-size: clamp(18px, 2.4vw, 30px);
+  font-weight: 400; opacity: .85;
+  margin-top: 18px;
+}
+.sleep-hint {
+  position: absolute; bottom: 48px;
+  font-size: 13px; opacity: .5;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: .35; } 50% { opacity: .75; } }
+
 /* 全局过渡 —— 主题切换丝滑感 */
 body, .taskbar, .start-menu, .action-center, .context-menu, .window, .taskbar-search {
   transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);

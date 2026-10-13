@@ -648,11 +648,17 @@
     document.getElementById('start-power').addEventListener('click', async () => {
       closeStartMenu();
       const r = await K.WM.dialog({
-        title: '电源', message: '你想关机还是重启 KevinOS？', icon: 'settings',
-        buttons: [{ label: '取消', value: 'cancel' }, { label: '重启', value: 'reboot', variant: 'primary' }, { label: '关机', value: 'shutdown', variant: 'danger' }]
+        title: '电源', message: '选择操作：', icon: 'settings',
+        buttons: [
+          { label: '取消', value: 'cancel' },
+          { label: '睡眠', value: 'sleep' },
+          { label: '重启', value: 'reboot', variant: 'primary' },
+          { label: '关机', value: 'shutdown', variant: 'danger' }
+        ]
       });
       if (r === 'shutdown') K.system.shutdown();
       if (r === 'reboot') K.system.reboot();
+      if (r === 'sleep') K.system.sleep();
     });
 
     // Dock：访达 / 启动台 / 废纸篓

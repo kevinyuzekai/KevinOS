@@ -10,15 +10,26 @@
   const BOOT_TIME = Date.now();
 
   /* ---------------- 壁纸 ---------------- */
+  // 纯渐变壁纸，无装饰图案；mode 区分暗色 / 浅色
   const wallpapers = [
-    { name: '深海蓝', bg: 'radial-gradient(120% 120% at 20% 10%, #1e3a8a 0%, #0b1229 45%, #05070f 100%)' },
-    { name: '极光', bg: 'linear-gradient(160deg, #0b1020 0%, #14284a 40%, #1f5a63 75%, #0b1020 100%)' },
-    { name: '暮光', bg: 'radial-gradient(120% 120% at 80% 20%, #ff8a3d 0%, #b5306e 40%, #2a1348 75%, #0b0714 100%)' },
-    { name: '森林', bg: 'radial-gradient(120% 120% at 30% 20%, #10b981 0%, #0f766e 45%, #06241f 100%)' },
-    { name: '紫罗兰', bg: 'linear-gradient(150deg, #2b1b52 0%, #4b2a8a 45%, #170f2e 100%)' },
-    { name: '石墨', bg: 'linear-gradient(160deg, #1b1f2a 0%, #2b3242 50%, #0d1017 100%)' },
-    { name: '晨曦', bg: 'radial-gradient(120% 120% at 70% 15%, #7aa2ff 0%, #4f7cff 35%, #1b2a4a 80%, #0a1120 100%)' },
-    { name: '樱花', bg: 'linear-gradient(150deg, #ffd6e6 0%, #ff9bb8 40%, #b2598f 100%)' }
+    // —— 暗色 ——
+    { name: '深海蓝', mode: 'dark', bg: 'radial-gradient(120% 120% at 20% 10%, #1e3a8a 0%, #0b1229 45%, #05070f 100%)' },
+    { name: '极光', mode: 'dark', bg: 'linear-gradient(160deg, #0b1020 0%, #14284a 40%, #1f5a63 75%, #0b1020 100%)' },
+    { name: '暮光', mode: 'dark', bg: 'radial-gradient(120% 120% at 80% 20%, #ff8a3d 0%, #b5306e 40%, #2a1348 75%, #0b0714 100%)' },
+    { name: '森林', mode: 'dark', bg: 'radial-gradient(120% 120% at 30% 20%, #10b981 0%, #0f766e 45%, #06241f 100%)' },
+    { name: '紫罗兰', mode: 'dark', bg: 'linear-gradient(150deg, #2b1b52 0%, #4b2a8a 45%, #170f2e 100%)' },
+    { name: '石墨', mode: 'dark', bg: 'linear-gradient(160deg, #1b1f2a 0%, #2b3242 50%, #0d1017 100%)' },
+    { name: '午夜', mode: 'dark', bg: 'linear-gradient(160deg, #0a0e1a 0%, #101827 50%, #05070d 100%)' },
+    { name: '熔岩', mode: 'dark', bg: 'radial-gradient(120% 120% at 70% 30%, #dc2626 0%, #7f1d1d 45%, #1a0a0a 100%)' },
+    // —— 浅色 ——
+    { name: '晨曦', mode: 'light', bg: 'radial-gradient(120% 120% at 70% 15%, #7aa2ff 0%, #4f7cff 35%, #1b2a4a 80%, #0a1120 100%)' },
+    { name: '晴空', mode: 'light', bg: 'linear-gradient(160deg, #bae6fd 0%, #7dd3fc 45%, #38bdf8 100%)' },
+    { name: '暖白', mode: 'light', bg: 'linear-gradient(160deg, #fef9f3 0%, #fde8d0 50%, #f5d4a8 100%)' },
+    { name: '薄荷', mode: 'light', bg: 'linear-gradient(160deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%)' },
+    { name: '薰衣草', mode: 'light', bg: 'linear-gradient(160deg, #ede9fe 0%, #ddd6fe 50%, #c4b5fd 100%)' },
+    { name: '沙滩', mode: 'light', bg: 'linear-gradient(160deg, #fef3c7 0%, #fde68a 50%, #fcd34d 100%)' },
+    { name: '樱花', mode: 'light', bg: 'linear-gradient(150deg, #ffd6e6 0%, #ff9bb8 40%, #b2598f 100%)' },
+    { name: '银灰', mode: 'light', bg: 'linear-gradient(160deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)' }
   ];
 
   const DEFAULTS = {
@@ -95,6 +106,50 @@
     document.body.appendChild(veil);
     requestAnimationFrame(() => veil.classList.add('show'));
     setTimeout(() => location.reload(), 1400);
+  }
+
+  /* ---------------- 睡眠（屏保） ---------------- */
+  function sleep() {
+    const wp = wallpapers[settings.wallpaper] || wallpapers[0];
+    const screen = el('div', { class: 'sleep-screen' }, [
+      el('div', { class: 'sleep-bg', style: { background: wp.bg } }),
+      el('div', { class: 'sleep-content' }, [
+        el('div', { class: 'sleep-time', id: 'sleep-time' }),
+        el('div', { class: 'sleep-date', id: 'sleep-date' }),
+        el('div', { class: 'sleep-hint', text: '点击或按任意键唤醒' })
+      ])
+    ]);
+    document.body.appendChild(screen);
+
+    const tick = () => {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const timeEl = document.getElementById('sleep-time');
+      if (timeEl) timeEl.textContent = hh + ':' + mm + ':' + ss;
+      const dateEl = document.getElementById('sleep-date');
+      if (dateEl) dateEl.textContent = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+
+    requestAnimationFrame(() => screen.classList.add('show'));
+
+    let waking = false;
+    const wake = () => {
+      if (waking) return;
+      waking = true;
+      clearInterval(timer);
+      screen.classList.remove('show');
+      setTimeout(() => screen.remove(), 400);
+      window.removeEventListener('pointerdown', wake);
+      window.removeEventListener('keydown', wake);
+    };
+    setTimeout(() => {
+      window.addEventListener('pointerdown', wake);
+      window.addEventListener('keydown', wake);
+    }, 300);
   }
 
   /* ---------------- 快捷键 ---------------- */
@@ -189,14 +244,14 @@
 
     setTimeout(() => {
       bootEl.remove();
-      K.desktop.notify({ title: '欢迎使用 KevinOS', body: '双击桌面图标或点击左下角开始菜单探索系统。', icon: 'about' });
-      K.desktop.notify({ title: '小提示', body: '拖动窗口到屏幕边缘可以自动分屏；右键桌面可呼出菜单。', silent: false });
+      K.desktop.notify({ title: '欢迎使用 KevinOS', body: '点击底部 Dock 或左上角 Kevin 菜单探索系统。', icon: 'about' });
+      K.desktop.notify({ title: '小提示', body: '拖动窗口到屏幕边缘可以自动分屏；右键桌面可新建文件与文件夹。', silent: false });
     }, 680);
   }
 
   K.system = {
     settings, getTheme, setTheme, setAccent, setWallpaper, setBrightness, setVolume,
-    applySettings, uptimeText, bootTimeText, shutdown, reboot,
+    applySettings, uptimeText, bootTimeText, shutdown, reboot, sleep,
     wallpapers, boot
   };
 

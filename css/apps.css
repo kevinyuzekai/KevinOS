@@ -251,10 +251,12 @@
 .swatch { width: 42px; height: 42px; border-radius: 12px; cursor: pointer; border: 2px solid transparent; transition: transform .18s var(--ease-spring); position: relative; }
 .swatch:hover { transform: scale(1.08); }
 .swatch.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--surface-solid) inset; }
-.wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
-.wall-thumb { height: 74px; border-radius: 12px; cursor: pointer; border: 2px solid transparent; background-size: cover; background-position: center; transition: transform .18s var(--ease-spring); }
+.wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 14px; }
+.wall-item { display: flex; flex-direction: column; gap: 6px; }
+.wall-thumb { height: 74px; border-radius: 12px; cursor: pointer; border: 2px solid transparent; background-size: cover; background-position: center; transition: transform .18s var(--ease-spring); box-shadow: 0 4px 14px -6px rgba(0,0,0,.4); }
 .wall-thumb:hover { transform: translateY(-3px); }
 .wall-thumb.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.wall-cap { font-size: 11.5px; color: var(--text-dim); text-align: center; line-height: 1.3; }
 .about-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 10px 0 24px; }
 .about-hero img { width: 92px; height: 92px; border-radius: 24px; box-shadow: 0 18px 44px -14px var(--accent-glow); }
 .about-hero h2 { font-size: 26px; }

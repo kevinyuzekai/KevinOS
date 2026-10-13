@@ -83,9 +83,12 @@
 
         const wallGrid = el('div', { class: 'wall-grid' });
         K.system.wallpapers.forEach((wp, i) => {
-          const th = el('div', { class: 'wall-thumb' + (st.wallpaper === i ? ' active' : ''), style: { backgroundImage: wp.thumb, background: wp.preview } });
+          const wrap = el('div', { class: 'wall-item' });
+          const th = el('div', { class: 'wall-thumb' + (st.wallpaper === i ? ' active' : ''), style: { background: wp.bg } });
           th.addEventListener('click', () => { K.system.setWallpaper(i); render(); });
-          wallGrid.appendChild(th);
+          const cap = el('div', { class: 'wall-cap', text: wp.name + ' · ' + (wp.mode === 'dark' ? '暗' : '浅') });
+          wrap.append(th, cap);
+          wallGrid.appendChild(wrap);
         });
         main.appendChild(el('div', { class: 'set-group' }, [
           el('div', { class: 'set-group-title', text: '壁纸' }),
