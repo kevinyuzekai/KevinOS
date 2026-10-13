@@ -491,7 +491,9 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
  * macOS 风格：Dock（底部应用栏）
  * ============================================================ */
 .dock {
-  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+  position: absolute; left: 0; right: 0; bottom: 12px;
+  margin: 0 auto;
+  width: fit-content;
   display: flex; align-items: flex-end; gap: 2px;
   height: 68px; padding: 8px 12px;
   border-radius: 22px;
@@ -504,19 +506,25 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
     0 4px 12px -4px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   z-index: 500;
-  will-change: transform, opacity;
-  animation: dockIn .7s var(--ease) both .1s;
+  transition: filter .4s var(--ease), transform .4s var(--ease);
+  animation: dockIn .7s var(--ease) backwards .1s;
 }
-/* Dock 整体入场：从下滑入 + 微缩放 + 模糊消散 */
+/* Dock 整体入场：从下滑入 + 微缩放 + 模糊消散（transform 不含 translateX，居中由 margin 负责） */
 @keyframes dockIn {
-  0%   { opacity: 0; transform: translateX(-50%) translateY(42px) scale(.94); filter: blur(8px); }
+  0%   { opacity: 0; transform: translateY(42px) scale(.94); filter: blur(8px); }
   55%  { filter: blur(0); }
-  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+/* 启动台展开时 Dock 模糊 + 微缩 */
+#desktop:has(.launchpad.open) .dock {
+  filter: blur(14px) saturate(.85);
+  transform: scale(.97);
+  pointer-events: none;
 }
 /* 图标逐个错开弹入 */
 .dock > *,
 .dock-apps > * {
-  animation: dockIconIn .5s var(--ease-spring) both;
+  animation: dockIconIn .5s var(--ease-spring) backwards;
   animation-delay: calc(.18s + var(--dock-i, 0) * 40ms);
 }
 @keyframes dockIconIn {
@@ -530,8 +538,8 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
 }
 .dock-item .app-ico {
   width: 46px; height: 46px; border-radius: 13px;
+  transform: none;
   transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease), filter .3s var(--ease);
-  will-change: transform;
 }
 .dock-item:hover .app-ico {
   transform: translateY(-14px) scale(1.3);
@@ -544,7 +552,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
   background: rgba(255, 255, 255, 0.2);
   margin: 0 6px;
   border-radius: 1px;
-  animation: sepIn .5s var(--ease) both .3s;
+  animation: sepIn .5s var(--ease) backwards .3s;
 }
 @keyframes sepIn { from { opacity: 0; transform: scaleY(.4); } to { opacity: 1; transform: scaleY(1); } }
 .dock-apps { display: flex; align-items: flex-end; gap: 2px; }
@@ -556,8 +564,8 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
 }
 .dock-app .app-ico {
   width: 44px; height: 44px; border-radius: 12px;
+  transform: none;
   transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease), filter .3s var(--ease);
-  will-change: transform;
   box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.3);
 }
 .dock-app:hover .app-ico {

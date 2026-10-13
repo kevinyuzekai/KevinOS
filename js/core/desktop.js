@@ -175,6 +175,7 @@
 
   /* ---------------- Dock（底部应用栏） ---------------- */
   const DOCK_PINNED = ['files', 'browser', 'ai', 'office', 'code', 'terminal', 'weather', 'notes', 'settings'];
+  let dockFirstRender = true;
 
   function renderDock() {
     const host = document.getElementById('dock-apps');
@@ -198,6 +199,8 @@
       const isRunning = running.includes(appId);
       const isFocused = isRunning && K.WM.windows.some(w => w.appId === appId && w.focused);
       const item = el('button', { class: 'dock-app' + (isFocused ? ' focused' : ''), title: app.name });
+      // 非首次渲染时跳过人场动画，避免窗口变化时图标闪烁
+      if (!dockFirstRender) item.style.animation = 'none';
       const ico = K.apps.appIconEl(app);
       ico.style.width = '44px'; ico.style.height = '44px'; ico.style.borderRadius = '12px';
       item.appendChild(ico);
@@ -222,6 +225,8 @@
     host.querySelectorAll(':scope > *').forEach(el => {
       el.style.setProperty('--dock-i', i++);
     });
+
+    dockFirstRender = false;
   }
 
   /* ---------------- 开始菜单 ---------------- */
