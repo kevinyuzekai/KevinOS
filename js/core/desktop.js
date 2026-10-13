@@ -7,18 +7,6 @@
   const { el } = K.util;
   const FS = K.FS;
 
-  const DESKTOP_SHORTCUTS = [
-    { app: 'files', name: '文件管理器' },
-    { app: 'browser', name: '浏览器' },
-    { app: 'code', name: '代码编辑器' },
-    { app: 'office', name: 'KevinOffice' },
-    { app: 'terminal', name: '终端' },
-    { app: 'weather', name: '天气' },
-    { app: 'store', name: '应用商店' },
-    { app: 'notes', name: '便签' },
-    { app: 'about', name: '关于本机' }
-  ];
-
   let notifs = [];
   let notifSeq = 0;
 
@@ -126,30 +114,6 @@
       host.querySelectorAll('.desk-icon').forEach(n => n.classList.remove('selected'));
       icon.classList.add('selected');
     };
-
-    DESKTOP_SHORTCUTS.forEach(sc => {
-      const app = K.apps.getApp(sc.app);
-      if (!app) return;
-      const icon = el('div', { class: 'desk-icon' }, [
-        el('div', { class: 'di-img' }, [K.apps.appIconEl(app)]),
-        el('div', { class: 'di-label', text: sc.name })
-      ]);
-      const open = () => K.WM.open(sc.app);
-      icon.addEventListener('click', () => {
-        if (isTouchDevice()) return; // 触屏由 pointerup 处理，避免重复
-        selectIcon(icon);
-      });
-      icon.addEventListener('dblclick', () => { if (!isTouchDevice()) open(); });
-      bindTapAndLongPress(icon, open, e => {
-        selectIcon(icon);
-        showContextMenu(e.clientX, e.clientY, [
-          { label: '打开', icon: 'about', act: open },
-          { sep: true },
-          { label: '从桌面移除', icon: 'settings', danger: true, act: () => notify({ title: '桌面', body: '系统应用无法从桌面移除' }) }
-        ]);
-      });
-      host.appendChild(icon);
-    });
 
     (FS.list('/Home/Desktop') || []).forEach(node => {
       const path = '/Home/Desktop/' + node.name;
