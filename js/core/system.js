@@ -29,7 +29,16 @@
     { name: '薰衣草', mode: 'light', bg: 'linear-gradient(160deg, #ede9fe 0%, #ddd6fe 50%, #c4b5fd 100%)' },
     { name: '沙滩', mode: 'light', bg: 'linear-gradient(160deg, #fef3c7 0%, #fde68a 50%, #fcd34d 100%)' },
     { name: '樱花', mode: 'light', bg: 'linear-gradient(150deg, #ffd6e6 0%, #ff9bb8 40%, #b2598f 100%)' },
-    { name: '银灰', mode: 'light', bg: 'linear-gradient(160deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)' }
+    { name: '银灰', mode: 'light', bg: 'linear-gradient(160deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)' },
+    // —— 带图案 ——
+    { name: '星点', mode: 'dark', bg: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,.18) 1px, transparent 1.5px) 0 0/26px 26px, radial-gradient(120% 120% at 30% 20%, #1e293b 0%, #0f172a 55%, #020617 100%)' },
+    { name: '网格', mode: 'dark', bg: 'linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px) 0 0/34px 34px, linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0/34px 34px, radial-gradient(120% 120% at 60% 30%, #312e81 0%, #1e1b4b 50%, #0c0a1f 100%)' },
+    { name: '斜纹', mode: 'dark', bg: 'repeating-linear-gradient(135deg, rgba(255,255,255,.04) 0, rgba(255,255,255,.04) 1px, transparent 1px, transparent 14px), linear-gradient(160deg, #134e4a 0%, #115e59 40%, #042f2e 100%)' },
+    { name: '光斑', mode: 'dark', bg: 'radial-gradient(circle at 20% 30%, rgba(99,102,241,.35), transparent 40%), radial-gradient(circle at 80% 70%, rgba(236,72,153,.30), transparent 40%), radial-gradient(circle at 50% 50%, rgba(16,185,129,.18), transparent 50%), #0b1020' },
+    { name: '波浪', mode: 'dark', bg: 'repeating-radial-gradient(circle at 50% 120%, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 2px, transparent 2px, transparent 22px), linear-gradient(180deg, #1e3a5f 0%, #0f1f3a 60%, #070d1a 100%)' },
+    { name: '点阵', mode: 'light', bg: 'radial-gradient(circle at 50% 50%, rgba(15,23,42,.10) 1px, transparent 1.5px) 0 0/22px 22px, linear-gradient(160deg, #e0e7ff 0%, #c7d2fe 50%, #a5b4fc 100%)' },
+    { name: '细线', mode: 'light', bg: 'linear-gradient(rgba(15,23,42,.06) 1px, transparent 1px) 0 0/28px 28px, linear-gradient(160deg, #fef3c7 0%, #fde68a 50%, #fbbf24 100%)' },
+    { name: '柔光', mode: 'light', bg: 'radial-gradient(circle at 25% 25%, rgba(255,255,255,.5), transparent 35%), radial-gradient(circle at 75% 75%, rgba(196,181,253,.45), transparent 40%), linear-gradient(160deg, #f5f3ff 0%, #ede9fe 50%, #ddd6fe 100%)' }
   ];
 
   const DEFAULTS = {
@@ -203,31 +212,29 @@
 
   /* ---------------- 引导 ---------------- */
   const BOOT_STEPS = [
-    { at: 0, text: '正在初始化内核…' },
-    { at: 18, text: '加载 KevinKernel 5.1-web…' },
-    { at: 40, text: '挂载虚拟文件系统…' },
-    { at: 58, text: '启动窗口管理器…' },
-    { at: 74, text: '注册系统应用…' },
-    { at: 88, text: '准备桌面环境…' },
-    { at: 100, text: '欢迎使用 KevinOS' }
+    { at: 0, text: '正在启动…' },
+    { at: 20, text: '初始化系统…' },
+    { at: 45, text: '加载服务…' },
+    { at: 70, text: '准备桌面…' },
+    { at: 100, text: '' }
   ];
 
   let booted = false;
   function boot() {
     if (booted) return; booted = true;
-    const bar = document.getElementById('boot-bar');
     const status = document.getElementById('boot-status');
-    let pct = 0;
+    const start = Date.now();
+    const DURATION = 1800;
     const timer = setInterval(() => {
-      pct = Math.min(100, pct + Math.random() * 9 + 3);
-      bar.style.width = pct + '%';
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, (elapsed / DURATION) * 100);
       const step = BOOT_STEPS.filter(s => s.at <= pct).pop();
-      if (step) status.textContent = step.text;
+      if (step && status) status.textContent = step.text;
       if (pct >= 100) {
         clearInterval(timer);
-        setTimeout(finishBoot, 420);
+        setTimeout(finishBoot, 300);
       }
-    }, 170);
+    }, 100);
   }
 
   function finishBoot() {
