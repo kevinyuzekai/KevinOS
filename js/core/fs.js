@@ -6,8 +6,9 @@
   'use strict';
 
   const STORAGE_KEY = 'kevinos.fs.v1';
-  /* 演示模式：每次启动都清空文件系统，不做持久化 */
-  const PERSIST = false;
+  /* 持久化模式：文件系统内容保存在浏览器 localStorage 中，
+     每个浏览器/设备独立存储，不跨设备同步 */
+  const PERSIST = true;
 
   const MIME = {
     txt: 'text/plain', md: 'text/markdown', js: 'text/javascript', json: 'application/json',
@@ -92,14 +93,12 @@
   let root;
 
   function load() {
-    // 演示模式：忽略历史数据，始终从默认目录树开始
+    // 持久化模式：优先从 localStorage 读取，没有则用默认目录树
     if (PERSIST) {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) { root = JSON.parse(raw); return; }
       } catch (e) { /* ignore */ }
-    } else {
-      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
     }
     root = defaultTree();
     save();

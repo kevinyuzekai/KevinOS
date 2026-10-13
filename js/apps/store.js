@@ -24,7 +24,16 @@
     ai: 'AI 助手，支持多服务商与 Agent 模式操作系统。',
     paint: '画板应用，支持自由绘制、多色画笔与保存为 PNG。',
     todo: '待办事项，支持添加、勾选、删除与自动保存。',
-    clock: '时钟应用，含实时时钟、秒表与倒计时功能。'
+    music: '本地音乐播放器，支持导入音频文件、播放列表与音量控制。',
+    gallery: '图片相册，自动扫描 Pictures 与桌面的图片文件。',
+    translate: '多语言翻译，支持 10 种语言互译（MyMemory API）。',
+    reader: '文本与 Markdown 阅读器，自动扫描 Documents 文档。',
+    passwords: '密码管理器，本地加密存储网站账号密码。',
+    archive: '文本压缩解压，基于 LZ77 算法。',
+    recorder: '屏幕录制，支持录制桌面并导出 WebM 视频。',
+    screenshot: '截图工具，截取桌面或当前窗口并保存为 PNG。',
+    converter: '单位换算器，支持长度/重量/温度/面积等 8 种类别。',
+    qrcode: '二维码生成器，输入文本生成可下载的二维码图片。'
   };
 
   K.registerApp({
