@@ -75,6 +75,9 @@
     const wp = wallpapers[settings.wallpaper] || wallpapers[0];
     const wall = document.getElementById('wallpaper');
     if (wall) wall.style.background = wp.bg;
+    // 壁纸明度档：桌面图标标签 / 壁纸遮罩跟随"壁纸"，不跟随主题（验收 S1）。
+    // 浅色主题配深色壁纸是常见组合，若按主题切标签色会变成深字压深底（1.07:1）。
+    html.setAttribute('data-wall', wp.mode);
 
     html.style.setProperty('--wall-brightness', String(settings.brightness / 100));
 

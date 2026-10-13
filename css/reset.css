@@ -13,7 +13,7 @@ body {
     Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
   font-size: 14px;
   color: var(--text);
-  background: #05070f;
+  background: var(--navy-950);
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;

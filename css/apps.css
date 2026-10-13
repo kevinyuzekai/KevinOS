@@ -136,6 +136,15 @@
 .term-dim { color: #7c8db5; }
 .term-input-line { display: flex; align-items: center; gap: 0; }
 .term-input { flex: 1; background: transparent; color: #eaf2ff; font-family: inherit; font-size: inherit; caret-color: #57d38c; }
+/* 焦点环例外（验收 S2）：全宽透明输入框上画 2px 轮廓会变成横跨半个窗口的蓝框，
+ * 光标本身就是焦点指示。只在这个选择器上关，全局 :focus-visible 规则保持不变。 */
+.term-input:focus-visible { outline: none; }
+/* 同类：代码编辑器画布、AI 输入框（都是 caret 即焦点的场景） */
+.cd-area:focus-visible,
+.cd-input:focus-visible,
+.ai-input:focus-visible,
+.ai-input-field:focus-visible { outline: none; }
+/* 注意：普通按钮 / 表单输入框的焦点环一律保留 —— 那是全项目唯一的键盘可达性保障。 */
 
 /* ============ 文本编辑器 ============ */
 .ed-wrap { flex: 1; display: flex; flex-direction: column; min-width: 0; }

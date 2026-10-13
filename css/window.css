@@ -10,14 +10,14 @@
   min-width: 360px; min-height: 240px;
   border-radius: var(--radius-lg);
   background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-4);            /* 失焦 */
+  border: none;                           /* 深色壁纸上 1px 浅色描边会形成白边，改用轮廓阴影（验收 A8） */
+  box-shadow: var(--outline-window), var(--shadow-4);      /* 失焦 */
   overflow: hidden;
   pointer-events: auto;
   transform-origin: center;
   will-change: transform, opacity, width, height;
 }
-.window.focused { box-shadow: var(--shadow-window); }   /* 聚焦；不加彩色描边 */
+.window.focused { box-shadow: var(--outline-window), var(--shadow-window); }   /* 聚焦；不加彩色描边 */
 
 /* 只有 Aurora 材质允许窗口半透明。
  * 自动模式（auto）在深色下等价于 Aurora，所以用 :is() 把两种情形一起写，
@@ -26,10 +26,10 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .wi
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--saturate));
   backdrop-filter: blur(var(--blur-strong)) saturate(var(--saturate));
-  box-shadow: var(--shadow-4);
+  box-shadow: var(--outline-window), var(--shadow-4);
 }
 html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .window.focused {
-  box-shadow: var(--shadow-window);
+  box-shadow: var(--outline-window), var(--shadow-window);
 }
 
 /* 打开 / 关闭 / 最小化动画 —— 280ms，只有"出现"用 spring */
@@ -79,10 +79,13 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .wi
   display: grid; place-items: center;
   transition: transform var(--dur-fast) var(--ease-standard);
 }
-.traffic svg { width: 7px; height: 7px; fill: rgba(0, 0, 0, .5); opacity: 0; transition: opacity var(--dur-fast) var(--ease-standard); }
-.traffic.close { background: var(--danger); }
-.traffic.minimize { background: var(--warning); }
-.traffic.maximize { background: var(--success); }
+.traffic svg { width: 8px; height: 8px; fill: rgba(0, 0, 0, .55); opacity: 0; transition: opacity var(--dur-fast) var(--ease-standard); }
+/* 交通灯是"非文字图形"：用高饱和、不随主题变的专用令牌（验收 A12）。
+ * 不能复用 --danger/--warning/--success —— 那是为浅底文字优化的低明度色，
+ * 做 12px 圆点会变成暗酒红/暗棕/暗墨绿。 */
+.traffic.close { background: var(--traffic-close); }
+.traffic.minimize { background: var(--traffic-min); }
+.traffic.maximize { background: var(--traffic-max); }
 .win-titlebar:hover .traffic svg { opacity: 1; }
 .traffic:active { transform: scale(.85); }
 
@@ -122,7 +125,7 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .wi
 }
 .os-dialog {
   position: relative; width: min(400px, calc(100vw - 40px)); border-radius: var(--radius-lg);
-  background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-window);
+  background: var(--surface); border: none; box-shadow: var(--outline-window), var(--shadow-window);
   padding: var(--space-5); animation: dlgIn var(--dur-slow) var(--ease-spring) both; overflow: hidden;
 }
 .os-dialog.leaving { animation: winClose var(--dur-base) var(--ease-exit) forwards; }

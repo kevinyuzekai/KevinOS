@@ -1,8 +1,9 @@
 /* ===== KevinOS · Theme tokens & Boot =====
- * 令牌层唯一事实来源：Pixel《设计规范 v2.1》定稿。
+ * 令牌层唯一事实来源：Pixel《设计规范 v2.1》定稿（design/tokens.css，2026-10-14 00:28 版）。
  * 方向 A 深海（磨砂）为默认材质，方向 B 极光用于深色/可选。
  * data-material 三档：auto（默认，浅色磨砂 / 深色自动极光）/ frost / aurora。
- * 组件里禁止再出现字面量色值、圆角、间距，一律走 var()。
+ * data-wall 二档：dark | light —— 桌面图标标签跟随"壁纸明度"，不跟随主题（验收 S1）。
+ * 组件里禁止再出现字面量色值、圆角、间距、字号，一律走 var()。
  */
 
 :root {
@@ -82,11 +83,16 @@
   --selected-overlay: rgba(44, 90, 224, 0.10);
 
   /* 壁纸与桌面专属（解决现有"图标标签永远白字"在浅壁纸上不可读的问题） */
-  --wallpaper: radial-gradient(125% 95% at 14% 4%, #FAFCFF 0%, #EDF2FC 30%, #DCE6F8 58%, #C6D6F0 82%, #B2C5E6 100%);
-  --wallpaper-overlay: linear-gradient(180deg, rgba(10, 16, 32, 0.02), rgba(10, 16, 32, 0.09));
-  --desk-label:        #0F1A2E;
-  --desk-label-shadow: 0 1px 2px rgba(255, 255, 255, 0.65);
-  --desk-icon-hover:   rgba(255, 255, 255, 0.42);
+  /* 桌面专属令牌跟随「壁纸明度」，不跟随主题 —— 壁纸和深浅色是两套独立设置，
+   * 浅色主题配深色壁纸是常见组合。由 JS 写 <html data-wall="dark|light">，
+   * 取值直接用 system.js wallpapers[] 里已有的 mode 字段。详见 §3.6 / §3.11。
+   * 下面这组是深色壁纸的默认值（DEFAULTS.wallpaper = 0「深海蓝」是深色壁纸）。 */
+  --wallpaper-overlay: linear-gradient(180deg, rgba(4, 7, 14, 0.10), rgba(4, 7, 14, 0.34));
+  --desk-label:        #F2F5FC;
+  --desk-label-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+  --desk-icon-hover:   rgba(255, 255, 255, 0.14);
+  /* --wallpaper 仅供设计稿/文档参考：实际壁纸由 system.js 直接写 background，不走此令牌 */
+  --wallpaper: radial-gradient(120% 120% at 20% 10%, #1E3A8A 0%, #0B1229 45%, #05070F 100%);
 
   /* ---------------------------------------------------------------
    * 4. 材质 —— 玻璃只允许出现在 3 类表面
@@ -95,7 +101,8 @@
    * ------------------------------------------------------------- */
   --material-mode: frost;                 /* 仅作标记，真实判定用 [data-material] */
   --blur: 24px;                           /* frost:24  aurora:40 */
-  --blur-strong: 36px;
+  --blur-strong: 32px;                    /* 必须与 [data-material="frost"] 一致：
+                                           * auto + 浅色 == frost，两者不能给出不同的模糊值 */
   --saturate: 170%;                       /* frost:170% aurora:200% */
   --glass-bg:      rgba(255, 255, 255, 0.72);
   --glass-bg-deep: rgba(255, 255, 255, 0.62);  /* 菜单栏/Dock 更深一档 */
@@ -237,6 +244,33 @@
   --canvas-shadow:  inset 0 1px 0 rgba(255, 255, 255, 0.05);
   /* 每个画布应用只允许有 1 个身份色，用于强调，不得用于大面积背景 */
   --canvas-accent:  #4F7CFF;
+  /* 画布内专用语义色：固定为「深底上的浅色」版本，**不随主题变**。
+   * 原因：主题语义色在浅色下是深绿/深红，放到深色画布上对比度只有 2~3:1。
+   * 画布应用内部一律用这组，禁止使用 --success/--danger/--warning/--info。 */
+  --canvas-fg-bright: #EAF2FF;   /* on --canvas-bg 16.5 ✓ */
+  --canvas-success:   #57D38C;   /* on --canvas-bg 10.6 ✓ */
+  --canvas-warning:   #FFB86C;   /* on --canvas-bg 11.4 ✓ */
+  --canvas-danger:    #FF8080;   /* on --canvas-bg  8.0 ✓ */
+  --canvas-info:      #6FA8FF;   /* on --canvas-bg  8.6 ✓ */
+
+  /* ---------------------------------------------------------------
+   * 12. 窗口交通灯 —— 专用图形色（**不随主题 / 材质变**）
+   *
+   * 为什么不用 --danger / --warning / --success：
+   *   那三个是为「浅底上的文字」优化的（低明度、高对比：白字 5.0~6.6:1）。
+   *   拿它们当 12px 实心圆点用，浅色下会变成暗酒红 / 暗棕 / 暗墨绿，
+   *   hover 时里面 7px 的深色符号也几乎看不见 —— 完全不像红黄绿交通灯。
+   *   实测：.traffic.close = rgb(180,35,24) = --danger(#B42318)，肉眼是黑红色。
+   *
+   * 这三个同时解决了 P5：原来 #ff5f57 与 --danger:#ff5c5c 是两套几乎一样的红，
+   * 现在交通灯有自己命名的一组，与语义色不再语义重叠。
+   *
+   * 用途：`.traffic.close / .minimize / .maximize` 的 background。
+   * 深色主题下也保持不变（对齐 macOS）。
+   * ------------------------------------------------------------- */
+  --traffic-close: #FF5F57;
+  --traffic-min:   #FEBC2E;
+  --traffic-max:   #28C840;
 
   /* 兼容旧类名：现有代码里的旧变量名全部指向新值，替换 :root 后可平滑过渡。
    * 注意：这里只做「别名」，绝不重复定义新变量本身，否则会形成循环引用。 */
@@ -304,13 +338,7 @@ html[data-theme="dark"] {
   --pressed-overlay:  rgba(255, 255, 255, 0.10);
   --selected-overlay: rgba(79, 124, 255, 0.18);
 
-  --wallpaper: radial-gradient(80% 60% at 18% 12%, rgba(79, 124, 255, 0.30), transparent 62%),
-               radial-gradient(70% 55% at 86% 78%, rgba(155, 107, 255, 0.24), transparent 62%),
-               linear-gradient(160deg, #080D1A 0%, #0C1428 48%, #0A1120 100%);
-  --wallpaper-overlay: linear-gradient(180deg, rgba(4, 7, 14, 0.10), rgba(4, 7, 14, 0.34));
-  --desk-label:        #F2F5FC;
-  --desk-label-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
-  --desk-icon-hover:   rgba(255, 255, 255, 0.14);
+  /* 壁纸与桌面标签已改为跟随 data-wall（见 :root 注释），此处不再按主题覆盖 */
 
   --glass-bg:      rgba(18, 24, 40, 0.72);
   --glass-bg-deep: rgba(12, 17, 30, 0.66);
@@ -326,6 +354,18 @@ html[data-theme="dark"] {
 
   --scrollbar:       rgba(255, 255, 255, 0.16);
   --scrollbar-hover: rgba(255, 255, 255, 0.30);
+}
+
+/* ============================================================================
+ * 壁纸明度档（data-wall）—— 桌面图标标签 / 壁纸遮罩跟随它，不跟随主题
+ * JS：applySettings 里 html.setAttribute('data-wall', wp.mode)
+ *     （system.js 的 wallpapers[] 每项已有 mode: 'dark' | 'light'）
+ * ========================================================================== */
+html[data-wall="light"] {
+  --wallpaper-overlay: linear-gradient(180deg, rgba(10, 16, 32, 0.02), rgba(10, 16, 32, 0.09));
+  --desk-label:        #0F1A2E;
+  --desk-label-shadow: 0 1px 2px rgba(255, 255, 255, 0.65);
+  --desk-icon-hover:   rgba(255, 255, 255, 0.42);
 }
 
 /* ============================================================================
@@ -407,7 +447,7 @@ html[data-accent="violet"] {
 /* 深色下强调色统一提亮，否则"当文字用"会不达标 */
 html[data-theme="dark"][data-accent="indigo"] { --accent: #4F46E5; --accent-text: #A5B4FC; --accent-hover: #6366F1; }
 html[data-theme="dark"][data-accent="cyan"]   { --accent: #0E7490; --accent-text: #67E8F9; --accent-hover: #155E75; }
-html[data-theme="dark"][data-accent="green"]  { --accent: #0F8A5C; --accent-text: #6EE7B7; --accent-hover: #12A06B; }
+html[data-theme="dark"][data-accent="green"]  { --accent: #0E8557; --accent-text: #6EE7B7; --accent-hover: #12A06B; }  /* #0F8A5C 白字只有 4.37，调到 #0E8557 = 4.67 */
 html[data-theme="dark"][data-accent="amber"]  { --accent: #B45309; --accent-text: #FCD34D; --accent-hover: #D97706; }
 html[data-theme="dark"][data-accent="rose"]   { --accent: #BE123C; --accent-text: #FDA4AF; --accent-hover: #E11D48; }
 html[data-theme="dark"][data-accent="violet"] { --accent: #6D28D9; --accent-text: #C4B5FD; --accent-hover: #7C3AED; }
@@ -471,6 +511,16 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .gl
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px; border-radius: inherit;
 }
+/* ============================================================================
+ * 项目补充令牌（tokens.css 之外，由 Dev 维护）
+ * 放在令牌同步段之后，每次从 design/tokens.css 同步都不会被覆盖。
+ * ========================================================================== */
+:root {
+  /* 窗口轮廓：窗口坐在深色壁纸上时，原来的 1px --border 浅色描边会形成一圈白边。
+   * 改成中性内轮廓，深浅壁纸都不刺眼（验收 A8）。 */
+  --outline-window: 0 0 0 1px rgba(6, 11, 24, 0.10);
+}
+
 
 /* 壁纸滤镜（亮度/色调，由 JS 注入 --wall-brightness） */
 .wallpaper { filter: brightness(var(--wall-brightness, 1)); }
@@ -483,6 +533,7 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .gl
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-edge);
 }
+/* 豁免：开机/关机/锁屏独立视觉层，不参与主题，允许字面量色值（规范 §3.12） */
 /* ============ 开机动画（居中终端风格） ============ */
 .boot-screen {
   position: fixed;
@@ -588,6 +639,7 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .gl
   .boot-title { font-size: 20px; }
 }
 
+/* 豁免：开机/关机/锁屏独立视觉层，不参与主题，允许字面量色值（规范 §3.12） */
 /* 关机遮罩 */
 .shutdown-veil {
   position: fixed; inset: 0; z-index: 9998;
@@ -599,6 +651,7 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .gl
 .shutdown-veil.show { opacity: 1; pointer-events: auto; }
 .shutdown-veil .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,.15); border-top-color: var(--accent); animation: spin .9s linear infinite; }
 
+/* 豁免：开机/关机/锁屏独立视觉层，不参与主题，允许字面量色值（规范 §3.12） */
 /* 睡眠 / 屏保 */
 .sleep-screen {
   position: fixed; inset: 0; z-index: 9997;
