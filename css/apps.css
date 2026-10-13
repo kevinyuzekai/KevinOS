@@ -467,8 +467,22 @@
 
 /* ============ 天气 ============ */
 .wx { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; color: #fff; overflow: hidden; transition: background .5s var(--ease); }
+/* 天气是"自带氛围渐变 + 固定白字"：7 套渐变（晴/雪/雾/多云…）末端偏亮，
+ * 而「逐小时」「未来 7 天」两个列表正好落在下半段，小字要求 4.5:1。
+ * 用底部 scrim 压暗下半区（iOS 天气的做法），上面的大气感保留（验收 V1）。 */
+.wx::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; top: 34%;
+  pointer-events: none; z-index: 1;
+  /* 只有线性 0→.42 不够：列表坐在渐变 52%~90% 处，那里 scrim 才积到 ~0.13，
+     白字最差只有 2.07:1。改成快速抬升再走平，保证下半区最上沿也 ≥4.5:1。 */
+  background: linear-gradient(180deg,
+    rgba(6, 11, 24, 0) 0%,
+    rgba(6, 11, 24, .48) 28%,
+    rgba(6, 11, 24, .60) 100%);
+}
+.wx-top, .wx-body { position: relative; z-index: 2; }
 .wx-top { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); flex: 0 0 auto; }
-.wx-city-btn { font-size: var(--fs-14); font-weight: 700; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: rgba(255,255,255,.16); color: #fff; transition: background-color .18s var(--ease); }
+.wx-city-btn { font-size: var(--fs-14); font-weight: 700; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: rgba(6,11,24,.38); color: #fff; transition: background-color .18s var(--ease); }
 .wx-city-btn:hover { background: rgba(255,255,255,.3); }
 .wx-date { font-size: var(--fs-12); color: rgba(255,255,255,.85); }
 .wx-top .t-btn { color: #fff; }
@@ -480,12 +494,12 @@
 .wx-temp { font-size: var(--fs-72); font-weight: 300; line-height: 1; letter-spacing: -2px; }
 .wx-cond { font-size: var(--fs-14); color: rgba(255,255,255,.9); margin-top: var(--space-2); }
 .wx-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); }
-.wx-metric { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.16); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); }
+.wx-metric { background: rgba(6,11,24,.40); border: 1px solid rgba(255,255,255,.16); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); }
 .wm-label { font-size: var(--fs-12); color: rgba(255,255,255,.85); }
 .wm-value { font-size: var(--fs-16); font-weight: 600; margin-top: var(--space-2); }
 .wx-section { font-size: var(--fs-12); font-weight: 600; letter-spacing: .8px; color: rgba(255,255,255,.82); margin: var(--space-6) 0 var(--space-3); }
 .wx-hourly { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: var(--space-2); }
-.wx-hour { flex: 0 0 auto; width: 64px; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-2); border-radius: var(--radius-md); background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.14); }
+.wx-hour { flex: 0 0 auto; width: 64px; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-2); border-radius: var(--radius-md); background: rgba(6,11,24,.45); border: 1px solid rgba(255,255,255,.14); }
 .wh-time { font-size: var(--fs-12); color: rgba(255,255,255,.82); }
 .wh-ico { font-size: var(--fs-24); }
 .wh-temp { font-size: var(--fs-14); font-weight: 600; }
@@ -506,7 +520,7 @@
 .wx-picker-head .search-input { width: 100%; height: 40px; background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.24); color: #fff; }
 .wx-picker-head .search-input::placeholder { color: rgba(255,255,255,.6); }
 .wx-picker-list { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-2); align-content: start; }
-.wx-pick-item { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.14); cursor: pointer; transition: background-color .15s var(--ease), transform .15s var(--ease-spring); }
+.wx-pick-item { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: rgba(6,11,24,.45); border: 1px solid rgba(255,255,255,.14); cursor: pointer; transition: background-color .15s var(--ease), transform .15s var(--ease-spring); }
 .wx-pick-item:hover { background: rgba(255,255,255,.26); transform: translateY(-2px); }
 .wx-pick-item.active { box-shadow: inset 0 0 0 1.5px #fff; }
 .wp-name { font-size: var(--fs-13); font-weight: 600; }
