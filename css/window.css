@@ -16,19 +16,25 @@
 }
 .theme-glass .window { background: var(--surface); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
 
-/* 打开 / 关闭 / 最小化动画 */
-.window.anim-open { animation: winOpen .42s var(--ease-spring) both; }
+/* 打开 / 关闭 / 最小化动画 — 丝滑版本 */
+.window.anim-open { animation: winOpen .48s var(--ease-spring) both; }
 @keyframes winOpen {
-  0% { opacity: 0; transform: scale(.86) translateY(22px); filter: blur(6px); }
-  60% { opacity: 1; filter: blur(0); }
-  100% { opacity: 1; transform: none; }
+  0% { opacity: 0; transform: scale(.88) translateY(20px); filter: blur(8px); }
+  55% { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
-.window.anim-close { animation: winClose .26s var(--ease) forwards; pointer-events: none; }
-@keyframes winClose { to { opacity: 0; transform: scale(.9) translateY(16px); filter: blur(4px); } }
-.window.anim-min { animation: winMin .34s var(--ease) forwards; pointer-events: none; }
-@keyframes winMin { to { opacity: 0; transform: scale(.4) translateY(160px); filter: blur(4px); } }
-.window.anim-restore { animation: winOpen .38s var(--ease-spring) both; }
-.window.anim-max { transition: all .3s var(--ease); }
+.window.anim-close { animation: winClose .3s var(--ease-in-out) forwards; pointer-events: none; }
+@keyframes winClose {
+  0% { opacity: 1; transform: scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: scale(.92) translateY(12px); filter: blur(6px); }
+}
+.window.anim-min { animation: winMin .4s var(--ease-in-out) forwards; pointer-events: none; }
+@keyframes winMin {
+  0% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  100% { opacity: 0; transform: scale(.35) translateY(140px); filter: blur(8px); }
+}
+.window.anim-restore { animation: winOpen .42s var(--ease-spring) both; }
+.window.anim-max { transition: width .35s var(--ease), height .35s var(--ease), top .35s var(--ease), left .35s var(--ease), border-radius .35s var(--ease); }
 .window.dragging { transition: none !important; }
 .window.resizing { transition: none !important; }
 
