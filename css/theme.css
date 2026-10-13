@@ -76,63 +76,71 @@ html[data-accent="orange"] { --accent: #ff8a3d; --accent-2: #ffb37a; --accent-so
   border: 1px solid var(--stroke);
 }
 
-/* ============ 开机动画（极简风格） ============ */
+/* ============ 开机动画（Render 风格 · 纯黑极简） ============ */
 .boot-screen {
   position: fixed;
   inset: 0;
   z-index: 9999;
   display: grid;
   place-items: center;
-  background: #060810;
-  color: #e6ecff;
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  background: #000;
+  color: #fff;
+  transition: opacity .6s ease, transform .6s ease;
 }
 .boot-screen::before {
   content: '';
   position: absolute; inset: 0;
-  background:
-    radial-gradient(60% 50% at 50% 35%, rgba(79,124,255,.18), transparent 70%),
-    radial-gradient(80% 60% at 50% 120%, rgba(124,58,237,.12), transparent 70%);
+  background: radial-gradient(50% 40% at 50% 45%, rgba(79,124,255,.06), transparent 70%);
+  pointer-events: none;
 }
-.boot-screen.leaving { opacity: 0; transform: scale(1.04); pointer-events: none; }
+.boot-screen.leaving { opacity: 0; transform: scale(1.02); pointer-events: none; }
 .boot-inner {
   position: relative;
-  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  display: flex; flex-direction: column; align-items: center; gap: 28px;
 }
-.boot-logo-wrap { position: relative; width: 96px; height: 96px; display: grid; place-items: center; }
+.boot-logo-wrap {
+  position: relative;
+  width: 120px; height: 120px;
+  display: grid; place-items: center;
+  animation: logoBreathe 2.4s ease-in-out infinite;
+}
+@keyframes logoBreathe {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px rgba(79,124,255,.25)); }
+  50% { transform: scale(1.04); filter: drop-shadow(0 0 32px rgba(79,124,255,.45)); }
+}
 .boot-logo {
-  width: 72px; height: 72px;
-  border-radius: 18px;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 24px 60px -16px rgba(79,124,255,.5);
-  animation: logoIn .9s var(--ease-spring) both;
+  width: 76px; height: 76px;
+  border-radius: 20px;
+  animation: logoIn .8s ease both;
 }
-@keyframes logoIn { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+@keyframes logoIn { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
 .boot-title {
-  font-size: 20px; font-weight: 600; letter-spacing: 2px;
-  color: #cdd8f5;
-  animation: fadeUp .8s var(--ease) both .15s;
+  font-size: 22px; font-weight: 300; letter-spacing: 4px;
+  color: rgba(255,255,255,.82);
+  animation: fadeUp .7s ease both .12s;
 }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .boot-loader {
-  display: flex; gap: 7px; align-items: center;
-  height: 12px;
-  animation: fadeUp .8s var(--ease) both .3s;
+  display: flex; gap: 6px; align-items: center;
+  height: 10px;
+  animation: fadeUp .7s ease both .24s;
 }
 .boot-loader span {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #7a8bd4;
-  animation: dotPulse 1.2s ease-in-out infinite;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,.5);
+  animation: dotPulse 1.3s ease-in-out infinite;
 }
-.boot-loader span:nth-child(2) { animation-delay: .18s; }
-.boot-loader span:nth-child(3) { animation-delay: .36s; }
+.boot-loader span:nth-child(2) { animation-delay: .16s; }
+.boot-loader span:nth-child(3) { animation-delay: .32s; }
 @keyframes dotPulse {
-  0%, 80%, 100% { transform: scale(.7); opacity: .35; }
-  40% { transform: scale(1); opacity: 1; }
+  0%, 80%, 100% { transform: scale(.6); opacity: .3; }
+  40% { transform: scale(1); opacity: .9; }
 }
 .boot-status {
-  font-size: 12px; color: #5a6689;
-  min-height: 16px; letter-spacing: .5px;
-  animation: fadeUp .8s var(--ease) both .45s;
+  font-size: 11px; font-weight: 400;
+  color: rgba(255,255,255,.28);
+  min-height: 14px; letter-spacing: 1.5px; text-transform: uppercase;
+  animation: fadeUp .7s ease both .36s;
 }
 
 /* 关机遮罩 */

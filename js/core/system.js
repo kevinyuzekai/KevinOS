@@ -212,10 +212,10 @@
 
   /* ---------------- 引导 ---------------- */
   const BOOT_STEPS = [
-    { at: 0, text: '正在启动…' },
-    { at: 20, text: '初始化系统…' },
-    { at: 45, text: '加载服务…' },
-    { at: 70, text: '准备桌面…' },
+    { at: 0, text: 'STARTING' },
+    { at: 25, text: 'INITIALIZING' },
+    { at: 50, text: 'LOADING SERVICES' },
+    { at: 75, text: 'PREPARING DESKTOP' },
     { at: 100, text: '' }
   ];
 
