@@ -207,35 +207,45 @@
     ]);
   }
 
-  /* ---------------- 任务栏 ---------------- */
-  function renderTaskbar() {
-    const host = document.getElementById('taskbar-apps');
+  /* ---------------- Dock（底部应用栏） ---------------- */
+  const DOCK_PINNED = ['files', 'browser', 'office', 'code', 'terminal', 'weather', 'notes', 'settings'];
+
+  function renderDock() {
+    const host = document.getElementById('dock-apps');
+    if (!host) return;
     host.innerHTML = '';
+
+    // 收集运行中的应用（按首次打开顺序去重）
+    const running = [];
+    const seen = new Set();
     K.WM.windows.forEach(win => {
-      const b = el('div', { class: 'tb-app' + (win.focused ? ' focused' : '') + (win.state.minimized ? ' minimized' : ''), title: win.app.name, role: 'button', 'aria-label': win.app.name, tabindex: '0' });
-      const ico = K.apps.appIconEl(win.app);
-      ico.style.width = '28px'; ico.style.height = '28px'; ico.style.borderRadius = '8px';
-      b.appendChild(ico);
-      b.appendChild(el('span', { class: 'dot' }));
-      b.addEventListener('click', () => {
-        if (win.state.minimized) K.WM.restore(win);
-        else if (win.focused) K.WM.minimize(win);
-        else K.WM.focus(win);
+      if (!seen.has(win.appId)) { seen.add(win.appId); running.push(win.appId); }
+    });
+
+    // 固定应用 + 运行中的非固定应用
+    const ids = [...DOCK_PINNED];
+    running.forEach(id => { if (!ids.includes(id)) ids.push(id); });
+
+    ids.forEach(appId => {
+      const app = K.apps.getApp(appId);
+      if (!app) return;
+      const isRunning = running.includes(appId);
+      const isFocused = isRunning && K.WM.windows.some(w => w.appId === appId && w.focused);
+      const item = el('button', { class: 'dock-app' + (isFocused ? ' focused' : ''), title: app.name });
+      const ico = K.apps.appIconEl(app);
+      ico.style.width = '44px'; ico.style.height = '44px'; ico.style.borderRadius = '12px';
+      item.appendChild(ico);
+      if (isRunning) item.appendChild(el('span', { class: 'dock-dot' }));
+      item.addEventListener('click', () => {
+        const wins = K.WM.windows.filter(w => w.appId === appId);
+        if (!wins.length) K.WM.open(appId);
+        else {
+          const focused = wins.find(w => w.focused && !w.state.minimized);
+          if (focused) K.WM.minimize(focused);
+          else { wins.forEach(w => { if (w.state.minimized) K.WM.restore(w); else K.WM.focus(w); }); }
+        }
       });
-      const ctxItems = [
-        { label: '还原 / 聚焦', icon: 'about', act: () => K.WM.restore(win) },
-        { label: win.state.minimized ? '显示' : '最小化', icon: 'media', act: () => win.state.minimized ? K.WM.restore(win) : K.WM.minimize(win) },
-        { label: '最大化 / 还原', icon: 'about', act: () => K.WM.toggleMax(win) },
-        { sep: true },
-        { label: '关闭窗口', icon: 'settings', danger: true, act: () => K.WM.close(win) }
-      ];
-      b.addEventListener('contextmenu', e => {
-        if (isTouchDevice()) return;
-        e.preventDefault();
-        showContextMenu(e.clientX, e.clientY - 10, ctxItems);
-      });
-      bindTapAndLongPress(b, null, e => showContextMenu(e.clientX, e.clientY - 10, ctxItems));
-      host.appendChild(b);
+      host.appendChild(item);
     });
   }
 
@@ -265,7 +275,6 @@
     closeActionCenter(); closeWifiPanel();
     m.hidden = false;
     requestAnimationFrame(() => m.classList.add('open'));
-    document.getElementById('start-btn').classList.add('active');
     renderStartApps();
     renderStartRecent();
     setTimeout(() => document.getElementById('start-search').focus(), 80);
@@ -273,7 +282,6 @@
   function closeStartMenu() {
     const m = document.getElementById('start-menu');
     m.classList.remove('open');
-    document.getElementById('start-btn').classList.remove('active');
     setTimeout(() => { if (!m.classList.contains('open')) m.hidden = true; }, 300);
     document.getElementById('start-search').value = '';
   }
@@ -368,7 +376,7 @@
       : '当前浏览器未提供 Network Information API（建议使用 Chrome/Edge），仅显示在线状态。受隐私保护，网页无法获取 Wi-Fi 名称与信号强度。';
   }
   function updateWifiTray() {
-    const btn = document.getElementById('tray-wifi');
+    const btn = document.getElementById('mb-wifi');
     if (!btn) return;
     const i = netInfo();
     btn.classList.toggle('offline', !i.online);
@@ -381,13 +389,13 @@
     p.hidden = false;
     renderWifiPanel();
     requestAnimationFrame(() => p.classList.add('open'));
-    document.getElementById('tray-wifi').classList.add('active');
+    document.getElementById('mb-wifi').classList.add('active');
   }
   function closeWifiPanel() {
     const p = document.getElementById('wifi-panel');
     if (p.hidden) return;
     p.classList.remove('open');
-    document.getElementById('tray-wifi').classList.remove('active');
+    document.getElementById('mb-wifi').classList.remove('active');
     setTimeout(() => { if (!p.classList.contains('open')) p.hidden = true; }, 300);
   }
   function toggleWifiPanel() { document.getElementById('wifi-panel').classList.contains('open') ? closeWifiPanel() : openWifiPanel(); }
@@ -463,14 +471,12 @@
     const s = document.getElementById('lp-search'); s.value = '';
     renderLaunchpad('');
     requestAnimationFrame(() => lp.classList.add('open'));
-    document.getElementById('launchpad-btn').classList.add('active');
     setTimeout(() => s.focus(), 140);
   }
   function closeLaunchpad() {
     const lp = document.getElementById('launchpad');
     if (lp.hidden) return;
     lp.classList.remove('open');
-    document.getElementById('launchpad-btn').classList.remove('active');
     setTimeout(() => { if (!lp.classList.contains('open')) lp.hidden = true; }, 340);
   }
   function toggleLaunchpad() { document.getElementById('launchpad').classList.contains('open') ? closeLaunchpad() : openLaunchpad(); }
@@ -554,10 +560,127 @@
     osdTimer = setTimeout(() => osd.hidden = true, 1400);
   }
 
+  /* ---------------- 桌面小组件 ---------------- */
+  const WIDGETS = [
+    { id: 'w-clock', name: '时钟', w: 200, h: 140, render: wClock },
+    { id: 'w-calendar', name: '日历', w: 220, h: 200, render: wCalendar },
+    { id: 'w-weather', name: '天气', w: 200, h: 150, render: wWeather },
+    { id: 'w-notes', name: '便签', w: 220, h: 160, render: wNotes }
+  ];
+  let widgetPositions = JSON.parse(localStorage.getItem('kevinos.widgets.v1') || '{}');
+
+  function saveWidgetPositions() { localStorage.setItem('kevinos.widgets.v1', JSON.stringify(widgetPositions)); }
+
+  function createWidget(def, idx) {
+    const pos = widgetPositions[def.id] || { x: window.innerWidth - def.w - 24 - idx * 8, y: 52 + idx * 12 };
+    const w = el('div', { class: 'widget', id: def.id, style: { left: pos.x + 'px', top: pos.y + 'px', width: def.w + 'px' } });
+    const head = el('div', { class: 'widget-head' }, [el('span', { class: 'widget-name', text: def.name })]);
+    const body = el('div', { class: 'widget-body' });
+    const close = el('button', { class: 'widget-close', text: '×' });
+    close.addEventListener('click', e => { e.stopPropagation(); w.remove(); });
+    head.appendChild(close);
+    w.append(head, body);
+    def.render(body);
+
+    // 拖拽
+    let sx = 0, sy = 0, ox = 0, oy = 0, dragging = false;
+    head.addEventListener('pointerdown', e => {
+      if (e.target.closest('.widget-close')) return;
+      dragging = true; sx = e.clientX; sy = e.clientY; ox = pos.x; oy = pos.y;
+      w.style.zIndex = 60;
+    });
+    document.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      pos.x = Math.max(8, Math.min(ox + e.clientX - sx, window.innerWidth - def.w - 8));
+      pos.y = Math.max(36, Math.min(oy + e.clientY - sy, window.innerHeight - 120));
+      w.style.left = pos.x + 'px'; w.style.top = pos.y + 'px';
+    });
+    document.addEventListener('pointerup', () => { if (dragging) { dragging = false; widgetPositions[def.id] = pos; saveWidgetPositions(); } });
+
+    return w;
+  }
+
+  function initWidgets() {
+    const host = document.getElementById('widgets-layer');
+    if (!host) return;
+    host.innerHTML = '';
+    WIDGETS.forEach((def, i) => host.appendChild(createWidget(def, i)));
+  }
+
+  /* ---- 时钟小组件 ---- */
+  function wClock(body) {
+    const t = el('div', { class: 'wc-time' });
+    const d = el('div', { class: 'wc-date' });
+    body.append(t, d);
+    function tick() {
+      const now = new Date();
+      const p = n => String(n).padStart(2, '0');
+      t.textContent = p(now.getHours()) + ':' + p(now.getMinutes());
+      const dow = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][now.getDay()];
+      d.textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${dow}`;
+    }
+    tick(); setInterval(tick, 1000);
+  }
+
+  /* ---- 日历小组件 ---- */
+  function wCalendar(body) {
+    const head = el('div', { class: 'wcal-head' });
+    const grid = el('div', { class: 'wcal-grid' });
+    body.append(head, grid);
+    function render() {
+      const now = new Date();
+      head.textContent = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月`;
+      grid.innerHTML = '';
+      ['日', '一', '二', '三', '四', '五', '六'].forEach(d => grid.appendChild(el('div', { class: 'wcal-dow', text: d })));
+      const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+      const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      for (let i = 0; i < first; i++) grid.appendChild(el('div', { class: 'wcal-cell empty' }));
+      for (let day = 1; day <= days; day++) {
+        const c = el('div', { class: 'wcal-cell' + (day === now.getDate() ? ' today' : ''), text: String(day) });
+        grid.appendChild(c);
+      }
+    }
+    render();
+  }
+
+  /* ---- 天气小组件 ---- */
+  function wWeather(body) {
+    const city = el('div', { class: 'ww-city', text: '上海' });
+    const temp = el('div', { class: 'ww-temp', text: '22°' });
+    const cond = el('div', { class: 'ww-cond', text: '多云' });
+    body.append(city, temp, cond);
+    // 模拟数据（真实环境可接入天气应用）
+    const sample = [
+      { city: '上海', temp: 22, cond: '多云' },
+      { city: '北京', temp: 18, cond: '晴' },
+      { city: '深圳', temp: 27, cond: '阵雨' }
+    ][Math.floor(Math.random() * 3)];
+    city.textContent = sample.city;
+    temp.textContent = sample.temp + '°';
+    cond.textContent = sample.cond;
+  }
+
+  /* ---- 便签小组件 ---- */
+  function wNotes(body) {
+    const ta = el('textarea', { class: 'wn-area', placeholder: '写点什么…', spellcheck: 'false' });
+    ta.value = localStorage.getItem('kevinos.widget.note') || '';
+    ta.addEventListener('input', () => localStorage.setItem('kevinos.widget.note', ta.value));
+    body.appendChild(ta);
+  }
+
   /* ---------------- 初始化 ---------------- */
+  function updateMenubarApp() {
+    const host = document.getElementById('mb-app-name');
+    if (!host) return;
+    const win = K.WM.windows.find(w => w.focused);
+    host.textContent = win ? win.app.name : 'Finder';
+  }
+
   function init() {
-    // 开始按钮
-    document.getElementById('start-btn').addEventListener('click', e => { e.stopPropagation(); toggleStartMenu(); });
+    // Logo / Apple 菜单 → 开始菜单（含关机/重启）
+    document.getElementById('mb-logo').addEventListener('click', e => { e.stopPropagation(); toggleStartMenu(); });
+
+    // 电源
     document.getElementById('start-power').addEventListener('click', async () => {
       closeStartMenu();
       const r = await K.WM.dialog({
@@ -568,9 +691,12 @@
       if (r === 'reboot') K.system.reboot();
     });
 
-    // 启动台
-    document.getElementById('launchpad-btn').addEventListener('click', e => { e.stopPropagation(); toggleLaunchpad(); });
+    // Dock：访达 / 启动台 / 废纸篓
+    document.getElementById('dock-finder').addEventListener('click', () => K.WM.open('files'));
+    document.getElementById('dock-launchpad').addEventListener('click', e => { e.stopPropagation(); toggleLaunchpad(); });
+    document.getElementById('dock-trash').addEventListener('click', () => K.WM.open('files', { path: '/Home/Trash' }));
     document.getElementById('start-all-apps').addEventListener('click', e => { e.stopPropagation(); openLaunchpad(); });
+
     document.getElementById('desktop').addEventListener('click', e => {
       const t = e.target.closest('[data-open-app]');
       if (t) { K.WM.open(t.dataset.openApp); closeStartMenu(); }
@@ -594,11 +720,11 @@
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && Math.abs(e.deltaY) > 18) lpGo(e.deltaY > 0 ? 1 : -1);
     }, { passive: true });
 
-    // 托盘
-    document.getElementById('tray-notif').addEventListener('click', e => { e.stopPropagation(); toggleActionCenter(); });
-    document.getElementById('tray-clock').addEventListener('click', e => { e.stopPropagation(); toggleActionCenter(); });
-    document.getElementById('tray-wifi').addEventListener('click', e => { e.stopPropagation(); toggleWifiPanel(); });
-    document.getElementById('tray-volume').addEventListener('click', () => showOSD('音量 ' + K.system.settings.volume + '%'));
+    // 顶部状态栏
+    document.getElementById('mb-notif').addEventListener('click', e => { e.stopPropagation(); toggleActionCenter(); });
+    document.getElementById('mb-clock').addEventListener('click', e => { e.stopPropagation(); toggleActionCenter(); });
+    document.getElementById('mb-wifi').addEventListener('click', e => { e.stopPropagation(); toggleWifiPanel(); });
+    document.getElementById('mb-volume').addEventListener('click', () => showOSD('音量 ' + K.system.settings.volume + '%'));
 
     // 亮度/音量
     document.getElementById('ac-brightness').addEventListener('input', e => K.system.setBrightness(+e.target.value));
@@ -607,60 +733,45 @@
 
     // 开始菜单搜索
     document.getElementById('start-search').addEventListener('input', e => renderStartApps(e.target.value.trim().toLowerCase()));
-    // 全局搜索
-    const gs = document.getElementById('global-search');
-    gs.addEventListener('input', e => doGlobalSearch(e.target.value));
-    gs.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        const q = gs.value.trim();
-        if (!q) return;
-        const app = K.apps.allApps().find(a => a.name.toLowerCase().includes(q.toLowerCase()) || a.id === q.toLowerCase());
-        if (app) { K.WM.open(app.id); closeSearch(); }
-        else { K.WM.open('browser', { url: q }); closeSearch(); }
-      }
-      if (e.key === 'Escape') closeSearch();
-    });
 
     // 桌面右键 / 触屏长按
     const desktop = document.getElementById('desktop');
     desktop.addEventListener('contextmenu', e => {
-      if (e.target.closest('.window') || e.target.closest('.taskbar') || e.target.closest('.desk-icon') || e.target.closest('.start-menu') || e.target.closest('.action-center')) return;
+      if (e.target.closest('.window') || e.target.closest('.dock') || e.target.closest('.menubar') || e.target.closest('.desk-icon') || e.target.closest('.start-menu') || e.target.closest('.action-center') || e.target.closest('.widget')) return;
       e.preventDefault();
       desktopMenu(e.clientX, e.clientY);
     });
-    // 触屏：桌面空白处长按呼出桌面菜单
     bindTapAndLongPress(desktop, null, e => {
-      if (e.target.closest('.window') || e.target.closest('.taskbar') || e.target.closest('.desk-icon') || e.target.closest('.start-menu') || e.target.closest('.action-center') || e.target.closest('.launchpad')) return;
+      if (e.target.closest('.window') || e.target.closest('.dock') || e.target.closest('.menubar') || e.target.closest('.desk-icon') || e.target.closest('.start-menu') || e.target.closest('.action-center') || e.target.closest('.launchpad') || e.target.closest('.widget')) return;
       desktopMenu(e.clientX, e.clientY);
     });
     // 空白点击
     desktop.addEventListener('mousedown', e => {
       if (!e.target.closest('#context-menu')) hideContextMenu();
-      if (!e.target.closest('#start-menu') && !e.target.closest('#start-btn') && !e.target.closest('#search-panel')) closeStartMenu();
-      if (!e.target.closest('#action-center') && !e.target.closest('#tray-notif') && !e.target.closest('#tray-clock')) closeActionCenter();
-      if (!e.target.closest('#wifi-panel') && !e.target.closest('#tray-wifi')) closeWifiPanel();
-      if (!e.target.closest('#search-panel') && !e.target.closest('#global-search')) closeSearch();
+      if (!e.target.closest('#action-center') && !e.target.closest('#mb-notif') && !e.target.closest('#mb-clock')) closeActionCenter();
+      if (!e.target.closest('#wifi-panel') && !e.target.closest('#mb-wifi')) closeWifiPanel();
       if (!e.target.closest('.desk-icon')) desktop.querySelectorAll('.desk-icon').forEach(n => n.classList.remove('selected'));
     });
-    window.addEventListener('resize', () => { hideContextMenu(); renderTaskbar(); });
+    window.addEventListener('resize', () => { hideContextMenu(); renderDock(); });
     document.getElementById('wallpaper').addEventListener('click', () => { hideContextMenu(); });
 
-    K.bus.on('window:change', renderTaskbar);
-    K.bus.on('window:focus', renderTaskbar);
+    K.bus.on('window:change', () => { renderDock(); updateMenubarApp(); });
+    K.bus.on('window:focus', () => { renderDock(); updateMenubarApp(); });
     FS.onChange(renderDesktopIcons);
 
     renderDesktopIcons();
-    renderTaskbar();
+    renderDock();
     renderNotifs();
     renderActionCenter();
     initNetwork();
+    initWidgets();
     updateClock();
     setInterval(updateClock, 1000);
   }
 
   K.desktop = {
     init, notify, showContextMenu, hideContextMenu,
-    renderDesktopIcons, renderTaskbar, renderNotifs, renderActionCenter,
+    renderDesktopIcons, renderDock, renderNotifs, renderActionCenter,
     renderStartApps, openStartMenu, closeStartMenu, toggleStartMenu,
     openActionCenter, closeActionCenter, showOSD,
     openWifiPanel, closeWifiPanel, toggleWifiPanel, renderWifiPanel, updateWifiTray,

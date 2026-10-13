@@ -77,6 +77,9 @@
   <div class="wallpaper" id="wallpaper"></div>
   <div class="wallpaper-overlay"></div>
 
+  <!-- 桌面小组件层 -->
+  <div class="widgets-layer" id="widgets-layer"></div>
+
   <!-- 桌面图标层 -->
   <div class="desktop-icons" id="desktop-icons"></div>
 
@@ -86,41 +89,49 @@
   <!-- 窗口拖拽/缩放时的预览遮罩 -->
   <div class="snap-preview" id="snap-preview" hidden></div>
 
-  <!-- ================= 任务栏 ================= -->
-  <div class="taskbar" id="taskbar">
-    <button class="start-btn" id="start-btn" title="开始">
+  <!-- ================= 顶部菜单栏 ================= -->
+  <div class="menubar" id="menubar">
+    <button class="mb-logo" id="mb-logo" title="KevinOS">
       <img src="assets/logo.png" alt="" />
     </button>
-
-    <button class="taskbar-btn" id="launchpad-btn" title="启动台">
-      <svg viewBox="0 0 24 24" class="ico"><path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/></svg>
-    </button>
-
-    <div class="taskbar-search" id="taskbar-search">
-      <svg viewBox="0 0 24 24" class="ico"><path d="M10 4a6 6 0 1 0 3.9 10.6l4.7 4.7 1.4-1.4-4.7-4.7A6 6 0 0 0 10 4zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>
-      <input type="text" id="global-search" placeholder="搜索应用、文件与命令…" autocomplete="off" spellcheck="false" />
-    </div>
-
-    <div class="taskbar-apps" id="taskbar-apps"></div>
-
-    <div class="taskbar-tray" id="taskbar-tray">
-      <div class="tray-items">
-        <button class="tray-btn" id="tray-wifi" title="网络">
-          <svg viewBox="0 0 24 24" class="ico"><path d="M12 3C7.5 3 3.5 4.7.6 7.6l1.4 1.4C4.7 6.5 8.2 5 12 5s7.3 1.5 10 4l1.4-1.4C20.5 4.7 16.5 3 12 3zm0 4c-3 0-5.7 1.1-7.8 3l1.4 1.4C7.2 9.8 9.5 9 12 9s4.8.8 6.4 2.4l1.4-1.4C17.7 8.1 15 7 12 7zm0 4c-1.7 0-3.2.6-4.4 1.7l1.4 1.4c.8-.7 1.9-1.1 3-1.1s2.2.4 3 1.1l1.4-1.4C15.2 11.6 13.7 11 12 11zm0 4a2 2 0 0 0-1.4 3.4l1.4 1.6 1.4-1.6A2 2 0 0 0 12 15z"/></svg>
-        </button>
-        <button class="tray-btn" id="tray-volume" title="音量">
-          <svg viewBox="0 0 24 24" class="ico"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a3.5 3.5 0 0 0-2-3.2v6.4a3.5 3.5 0 0 0 2-3.2zm2 0a5.5 5.5 0 0 1-3 4.9l.9 2A7.5 7.5 0 0 0 20 12a7.5 7.5 0 0 0-3.6-6.3l-.9 2A5.5 5.5 0 0 1 18.5 12z"/></svg>
-        </button>
-      </div>
-      <button class="tray-clock" id="tray-clock">
-        <span class="clock-time" id="clock-time">--:--</span>
-        <span class="clock-date" id="clock-date">-------</span>
+    <div class="mb-app" id="mb-app-name">Finder</div>
+    <div class="mb-menus" id="mb-menus"></div>
+    <div class="mb-spacer"></div>
+    <div class="mb-status" id="mb-status">
+      <button class="mb-st" id="mb-wifi" title="网络">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M12 3C7.5 3 3.5 4.7.6 7.6l1.4 1.4C4.7 6.5 8.2 5 12 5s7.3 1.5 10 4l1.4-1.4C20.5 4.7 16.5 3 12 3zm0 4c-3 0-5.7 1.1-7.8 3l1.4 1.4C7.2 9.8 9.5 9 12 9s4.8.8 6.4 2.4l1.4-1.4C17.7 8.1 15 7 12 7zm0 4c-1.7 0-3.2.6-4.4 1.7l1.4 1.4c.8-.7 1.9-1.1 3-1.1s2.2.4 3 1.1l1.4-1.4C15.2 11.6 13.7 11 12 11zm0 4a2 2 0 0 0-1.4 3.4l1.4 1.6 1.4-1.6A2 2 0 0 0 12 15z"/></svg>
       </button>
-      <button class="tray-btn tray-notif" id="tray-notif" title="通知">
+      <button class="mb-st" id="mb-battery" title="电池">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M16 6H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1h2v-4h-2V8a2 2 0 0 0-2-2zM4 8h12v8H4V8z"/></svg>
+      </button>
+      <button class="mb-st" id="mb-volume" title="音量">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a3.5 3.5 0 0 0-2-3.2v6.4a3.5 3.5 0 0 0 2-3.2z"/></svg>
+      </button>
+      <button class="mb-st mb-clock" id="mb-clock">
+        <span class="mb-clock-time" id="clock-time">--:--</span>
+        <span class="mb-clock-date" id="clock-date">---</span>
+      </button>
+      <button class="mb-st" id="mb-notif" title="通知中心">
         <svg viewBox="0 0 24 24" class="ico"><path d="M12 22a2.5 2.5 0 0 0 2.4-2h-4.8A2.5 2.5 0 0 0 12 22zm7-6v-5a7 7 0 0 0-5-6.7V4a2 2 0 1 0-4 0v.3A7 7 0 0 0 5 11v5l-1.7 1.7A1 1 0 0 0 4 19.4h16a1 1 0 0 0 .7-1.7L19 16z"/></svg>
         <span class="notif-badge" id="notif-badge" hidden>0</span>
       </button>
     </div>
+  </div>
+
+  <!-- ================= Dock（底部） ================= -->
+  <div class="dock" id="dock">
+    <button class="dock-item" id="dock-finder" data-app="files" title="访达">
+      <span class="app-ico" style="background:linear-gradient(145deg,#2b6cff,#4f9bff)"><svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z"/></svg></span>
+    </button>
+    <button class="dock-item" id="dock-launchpad" title="启动台">
+      <span class="app-ico" style="background:linear-gradient(145deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/></svg></span>
+    </button>
+    <div class="dock-sep"></div>
+    <div class="dock-apps" id="dock-apps"></div>
+    <div class="dock-sep"></div>
+    <button class="dock-item" id="dock-trash" title="废纸篓">
+      <span class="app-ico" style="background:linear-gradient(145deg,#8a94a8,#b0b8c8)"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7L6 7zm3-2l1-1h4l1 1h5v2H4V5h5z"/></svg></span>
+    </button>
   </div>
 
   <!-- ================= 开始菜单 ================= -->

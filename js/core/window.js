@@ -18,7 +18,8 @@
   })();
   K.bus = bus;
 
-  const TASKBAR_H = 72;
+  const MENUBAR_H = 28;
+  const DOCK_H = 76;
   const SNAP_EDGE = 10;
   let zCounter = 100;
   const windows = [];
@@ -26,11 +27,16 @@
   let snapEl = null;
 
   function workArea() {
-    return { x: 0, y: 0, w: window.innerWidth, h: window.innerHeight - TASKBAR_H };
+    return { x: 0, y: MENUBAR_H, w: window.innerWidth, h: window.innerHeight - MENUBAR_H - DOCK_H };
   }
 
   function makeBtn(cls, svg, title) {
     return el('button', { class: 'win-btn ' + cls, title, html: `<svg viewBox="0 0 24 24">${svg}</svg>` });
+  }
+
+  // macOS 风格交通灯按钮：关闭 / 最小化 / 缩放
+  function makeTraffic(cls, title, path) {
+    return el('button', { class: 'traffic ' + cls, title, html: `<svg viewBox="0 0 24 24"><path d="${path}"/></svg>` });
   }
 
   /* ---------- 创建窗口 ---------- */
@@ -59,13 +65,14 @@
     icoEl.style.borderRadius = '7px';
 
     const titlebar = el('div', { class: 'win-titlebar' }, [
+      el('div', { class: 'win-traffic' }, [
+        makeTraffic('close', '关闭', 'M6.4 7L12 12.6 17.6 7 19 8.4 13.4 14 19 19.6 17.6 21 12 15.4 6.4 21 5 19.6 10.6 14 5 8.4z'),
+        makeTraffic('minimize', '最小化', 'M6 12h12'),
+        app.resizable === false ? null : makeTraffic('maximize', '缩放', 'M7 7h10v2H9v8H7V7z')
+      ].filter(Boolean)),
       icoEl,
       el('div', { class: 'win-title', text: app.name }),
-      el('div', { class: 'win-controls' }, [
-        makeBtn('minimize', '<path d="M6 12h12v1.6H6z"/>', '最小化'),
-        app.resizable === false ? null : makeBtn('maximize', '<rect x="6" y="6" width="12" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/>', '最大化'),
-        makeBtn('close', '<path d="M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/>', '关闭')
-      ])
+      el('div', { class: 'win-controls' }, [])
     ]);
     const body = el('div', { class: 'win-body' });
     winEl.append(titlebar, body);
@@ -98,9 +105,9 @@
     titlebar.addEventListener('dblclick', e => { if (!e.target.closest('.win-btn')) toggleMax(win); });
     titlebar.addEventListener('pointerdown', e => startDrag(win, e));
     winEl.querySelectorAll('.rs').forEach(r => r.addEventListener('pointerdown', e => startResize(win, e, r.dataset.dir)));
-    const closeBtn = titlebar.querySelector('.win-btn.close');
-    const minBtn = titlebar.querySelector('.win-btn.minimize');
-    const maxBtn = titlebar.querySelector('.win-btn.maximize');
+    const closeBtn = titlebar.querySelector('.traffic.close');
+    const minBtn = titlebar.querySelector('.traffic.minimize');
+    const maxBtn = titlebar.querySelector('.traffic.maximize');
     closeBtn.addEventListener('click', e => { e.stopPropagation(); close(win); });
     minBtn.addEventListener('click', e => { e.stopPropagation(); minimize(win); });
     if (maxBtn) maxBtn.addEventListener('click', e => { e.stopPropagation(); toggleMax(win); });
@@ -181,7 +188,7 @@
       apply(win);
     } else {
       win.state.prev = { x: win.state.x, y: win.state.y, w: win.state.w, h: win.state.h };
-      Object.assign(win.state, { x: 0, y: 0, w: wa.w, h: wa.h, maximized: true });
+      Object.assign(win.state, { x: wa.x, y: wa.y, w: wa.w, h: wa.h, maximized: true });
       win.el.classList.add('anim-max');
       apply(win);
     }
@@ -228,7 +235,7 @@
       }
 
       s.x = Math.max(-s.w + 120, Math.min(ox + dx, window.innerWidth - 120));
-      s.y = Math.max(0, Math.min(oy + dy, workArea().h - 44));
+      s.y = Math.max(MENUBAR_H, Math.min(oy + dy, workArea().y + workArea().h - 44));
       win.el.style.left = s.x + 'px'; win.el.style.top = s.y + 'px';
       win.el.classList.add('dragging');
 

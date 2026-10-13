@@ -445,3 +445,144 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
   .desktop-icons { grid-auto-columns: 80px; grid-template-rows: repeat(auto-fill, 84px); }
   .desk-icon { width: 80px; height: 84px; }
 }
+/* ============================================================
+ * macOS 风格：顶部菜单栏
+ * ============================================================ */
+.menubar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 501;
+  height: 28px; display: flex; align-items: center; gap: 12px;
+  padding: 0 14px;
+  background: var(--bar-bg);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+  backdrop-filter: blur(var(--blur)) saturate(180%);
+  border-bottom: 1px solid var(--stroke);
+  font-size: 13px; color: var(--text);
+  user-select: none;
+}
+.mb-logo {
+  width: 22px; height: 22px; padding: 0; border: none; background: transparent;
+  border-radius: 5px; cursor: pointer; display: grid; place-items: center;
+  transition: background-color .14s;
+}
+.mb-logo img { width: 16px; height: 16px; border-radius: 4px; }
+.mb-logo:hover { background: var(--stroke); }
+.mb-app { font-weight: 700; font-size: 13.5px; }
+.mb-menus { display: flex; gap: 4px; }
+.mb-spacer { flex: 1; }
+.mb-status { display: flex; align-items: center; gap: 4px; }
+.mb-st {
+  height: 22px; padding: 0 7px; border: none; background: transparent;
+  border-radius: 5px; color: var(--text); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; transition: background-color .14s;
+}
+.mb-st .ico { width: 15px; height: 15px; fill: currentColor; }
+.mb-st:hover { background: var(--stroke); }
+.mb-clock { font-variant-numeric: tabular-nums; gap: 6px; }
+.mb-clock-date { opacity: .75; }
+.mb-st .notif-badge {
+  position: absolute; top: 2px; right: 2px; min-width: 14px; height: 14px;
+  padding: 0 3px; border-radius: 7px; background: var(--danger); color: #fff;
+  font-size: 9px; font-weight: 700; display: grid; place-items: center;
+}
+.mb-st { position: relative; }
+
+/* ============================================================
+ * macOS 风格：Dock（底部应用栏）
+ * ============================================================ */
+.dock {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+  display: flex; align-items: flex-end; gap: 4px;
+  height: 64px; padding: 6px 10px;
+  border-radius: 18px;
+  background: var(--bar-bg);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
+  backdrop-filter: blur(var(--blur)) saturate(180%);
+  border: 1px solid var(--bar-stroke);
+  box-shadow: var(--shadow-panel);
+  z-index: 500;
+  animation: barIn .7s var(--ease-spring) both .1s;
+}
+.dock-item {
+  width: 48px; height: 48px; padding: 0; border: none; background: transparent;
+  border-radius: 12px; cursor: pointer; display: grid; place-items: center;
+  transition: transform .2s var(--ease-spring);
+}
+.dock-item .app-ico { width: 44px; height: 44px; border-radius: 12px; }
+.dock-item:hover { transform: translateY(-6px) scale(1.12); }
+.dock-sep {
+  width: 1px; height: 36px; align-self: center;
+  background: var(--stroke-strong); margin: 0 4px;
+}
+.dock-apps { display: flex; align-items: flex-end; gap: 4px; }
+.dock-app {
+  width: 48px; height: 56px; padding: 0 0 4px; border: none; background: transparent;
+  border-radius: 12px; cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end; gap: 3px;
+  position: relative; transition: transform .2s var(--ease-spring);
+}
+.dock-app .app-ico { width: 42px; height: 42px; border-radius: 11px; transition: transform .2s var(--ease-spring); }
+.dock-app:hover .app-ico { transform: translateY(-8px) scale(1.15); }
+.dock-app.focused .app-ico { transform: translateY(-3px); }
+.dock-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--text-dim); flex-shrink: 0;
+}
+
+/* ============================================================
+ * 桌面小组件（macOS Sonoma 风格）
+ * ============================================================ */
+.widgets-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.widget {
+  position: absolute; pointer-events: auto;
+  border-radius: 18px; overflow: hidden;
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--stroke);
+  box-shadow: 0 12px 36px -10px rgba(0,0,0,.4);
+  color: var(--text);
+  animation: wIn .4s var(--ease-spring) both;
+}
+@keyframes wIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
+.widget-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; cursor: grab;
+  border-bottom: 1px solid var(--stroke);
+  opacity: 0; transition: opacity .2s;
+}
+.widget:hover .widget-head { opacity: 1; }
+.widget:active .widget-head { cursor: grabbing; }
+.widget-name { font-size: 11px; font-weight: 600; color: var(--text-dim); letter-spacing: .3px; }
+.widget-close {
+  width: 18px; height: 18px; padding: 0; border: none; border-radius: 50%;
+  background: var(--stroke); color: var(--text-dim); font-size: 13px; line-height: 1;
+  cursor: pointer; display: grid; place-items: center;
+}
+.widget-close:hover { background: var(--danger); color: #fff; }
+.widget-body { padding: 12px 14px; }
+
+/* 时钟 */
+.wc-time { font-size: 38px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; font-variant-numeric: tabular-nums; text-align: center; }
+.wc-date { font-size: 12px; color: var(--text-dim); text-align: center; margin-top: 4px; }
+
+/* 日历 */
+.wcal-head { font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 8px; }
+.wcal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.wcal-dow { font-size: 10px; color: var(--text-dim); padding: 3px 0; }
+.wcal-cell { font-size: 11.5px; padding: 3px 0; border-radius: 4px; }
+.wcal-cell.empty { opacity: 0; }
+.wcal-cell.today { background: var(--accent); color: #fff; font-weight: 700; }
+
+/* 天气 */
+.ww-city { font-size: 13px; color: var(--text-dim); text-align: center; }
+.ww-temp { font-size: 40px; font-weight: 700; text-align: center; line-height: 1.1; margin: 2px 0; }
+.ww-cond { font-size: 12px; color: var(--text-dim); text-align: center; }
+
+/* 便签 */
+.wn-area {
+  width: 100%; height: 110px; resize: none; border: none; outline: none;
+  background: transparent; color: var(--text); font-size: 13px; line-height: 1.5;
+  font-family: inherit;
+}
+.wn-area::placeholder { color: var(--text-dim); }
