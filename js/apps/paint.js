@@ -8,7 +8,7 @@
 
   K.registerApp({
     id: 'paint', name: '画板', icon: 'editor', installable: true,
-    gradient: ['#f43f5e', '#fb923c'], category: '创意',
+    gradient: ['#6D28D9', '#A78BFA'], category: '创意',
     size: { w: 820, h: 600 },
     mount(win) {
       let color = '#4f7cff', size = 4, drawing = false, ctx = null;

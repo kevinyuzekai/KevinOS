@@ -8,7 +8,7 @@
 
   K.registerApp({
     id: 'recorder', name: '录屏', icon: 'media', installable: true,
-    gradient: ['#ef4444', '#dc2626'], category: '媒体',
+    gradient: ['#BE123C', '#FB7185'], category: '媒体',
     size: { w: 640, h: 520 },
     mount(win) {
       const video = el('video', { class: 'rec-video', autoplay: 'autoplay', muted: 'muted' });

@@ -158,7 +158,7 @@
 
   K.registerApp({
     id: 'weather', name: '天气', icon: 'weather',
-    gradient: ['#38bdf8', '#0ea5e9'], pinned: true, category: '生活',
+    gradient: ['#0E7490', '#22D3EE'], pinned: true, category: '生活',
     size: { w: 900, h: 640 },
     mount(win) {
       let city = CITIES.find(c => c.name === localStorage.getItem(KEY)) || CITIES[0];

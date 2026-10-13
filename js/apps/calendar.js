@@ -13,7 +13,7 @@
 
   K.registerApp({
     id: 'calendar', name: '日历', icon: 'calendar',
-    gradient: ['#ff5c8a', '#ff9bb8'], pinned: false, category: '办公',
+    gradient: ['#0A7A50', '#34D399'], pinned: false, category: '办公',
     size: { w: 700, h: 620 },
     mount(win) {
       let events = loadEvents();

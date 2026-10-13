@@ -12,7 +12,7 @@
 
   K.registerApp({
     id: 'todo', name: '待办', icon: 'notes', installable: true,
-    gradient: ['#10b981', '#34d399'], category: '效率',
+    gradient: ['#0A7A50', '#34D399'], category: '效率',
     size: { w: 560, h: 640 },
     mount(win) {
       let todos = load();

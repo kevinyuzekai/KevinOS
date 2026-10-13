@@ -17,7 +17,7 @@
 
   K.registerApp({
     id: 'notes', name: '便签', icon: 'notes',
-    gradient: ['#f5b942', '#ffd97a'], pinned: false, category: '办公',
+    gradient: ['#B45309', '#FBBF24'], pinned: false, category: '办公',
     size: { w: 780, h: 560 },
     mount(win) {
       let notes = load();

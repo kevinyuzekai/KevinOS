@@ -8,7 +8,7 @@
 
   K.registerApp({
     id: 'about', name: '关于本机', icon: 'about',
-    gradient: ['#1b2a4a', '#24365f'], pinned: false, category: '系统',
+    gradient: ['#2C5AE0', '#4F7CFF'], pinned: false, category: '系统',
     size: { w: 440, h: 500 }, resizable: true, single: true,
     mount(win) {
       const root = el('div', { class: 'about' }, [

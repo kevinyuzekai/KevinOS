@@ -22,7 +22,7 @@
 
   K.registerApp({
     id: 'photos', name: '图片查看器', icon: 'photos',
-    gradient: ['#4f7cff', '#22d3ee'], pinned: false, category: '媒体',
+    gradient: ['#6D28D9', '#A78BFA'], pinned: false, category: '媒体',
     size: { w: 860, h: 620 },
     mount(win, args) {
       let list = [];

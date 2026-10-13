@@ -202,7 +202,8 @@
       // 非首次渲染时跳过人场动画，避免窗口变化时图标闪烁
       if (!dockFirstRender) item.style.animation = 'none';
       const ico = K.apps.appIconEl(app);
-      ico.style.width = '44px'; ico.style.height = '44px'; ico.style.borderRadius = '12px';
+      // 尺寸/圆角交给 CSS（.dock-app .app-ico 统一 48px + 22%），不要在 JS 里写死，
+      // 否则 .dock-item 与 .dock-app 两套样式永远对不齐（规范 P16）。
       item.appendChild(ico);
       if (isRunning) item.appendChild(el('span', { class: 'dock-dot' }));
       item.addEventListener('click', () => {
