@@ -213,6 +213,15 @@
       });
       host.appendChild(item);
     });
+
+    // 设置图标入场错开序号（--dock-i）
+    let i = 0;
+    document.querySelectorAll('#dock > *').forEach(el => {
+      el.style.setProperty('--dock-i', i++);
+    });
+    host.querySelectorAll(':scope > *').forEach(el => {
+      el.style.setProperty('--dock-i', i++);
+    });
   }
 
   /* ---------------- 开始菜单 ---------------- */
