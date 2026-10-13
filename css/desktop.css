@@ -491,42 +491,77 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: none;
  * macOS 风格：Dock（底部应用栏）
  * ============================================================ */
 .dock {
-  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
-  display: flex; align-items: flex-end; gap: 4px;
-  height: 64px; padding: 6px 10px;
-  border-radius: 18px;
-  background: var(--bar-bg);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
-  backdrop-filter: blur(var(--blur)) saturate(180%);
-  border: 1px solid var(--bar-stroke);
-  box-shadow: var(--shadow-panel);
+  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 68px; padding: 8px 12px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 12px 40px -12px rgba(0, 0, 0, 0.5),
+    0 4px 12px -4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   z-index: 500;
-  animation: barIn .7s var(--ease-spring) both .1s;
+  animation: dockIn .8s var(--ease-spring) both .15s;
+}
+@keyframes dockIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(30px) scale(0.9); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 .dock-item {
-  width: 48px; height: 48px; padding: 0; border: none; background: transparent;
-  border-radius: 12px; cursor: pointer; display: grid; place-items: center;
-  transition: transform .2s var(--ease-spring);
+  width: 52px; height: 52px; padding: 0; border: none; background: transparent;
+  border-radius: 14px; cursor: pointer; display: grid; place-items: center;
+  transition: transform .25s var(--ease-spring);
+  position: relative;
 }
-.dock-item .app-ico { width: 44px; height: 44px; border-radius: 12px; }
-.dock-item:hover { transform: translateY(-6px) scale(1.12); }
+.dock-item .app-ico { width: 46px; height: 46px; border-radius: 13px; transition: transform .25s var(--ease-spring); }
+.dock-item:hover .app-ico { transform: translateY(-10px) scale(1.22); }
+.dock-item:active .app-ico { transform: translateY(-4px) scale(1.08); }
 .dock-sep {
-  width: 1px; height: 36px; align-self: center;
-  background: var(--stroke-strong); margin: 0 4px;
+  width: 1px; height: 40px; align-self: center;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 6px;
+  border-radius: 1px;
 }
-.dock-apps { display: flex; align-items: flex-end; gap: 4px; }
+.dock-apps { display: flex; align-items: flex-end; gap: 2px; }
 .dock-app {
-  width: 48px; height: 56px; padding: 0 0 4px; border: none; background: transparent;
-  border-radius: 12px; cursor: pointer; display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-end; gap: 3px;
-  position: relative; transition: transform .2s var(--ease-spring);
+  width: 52px; height: 60px; padding: 0 0 6px; border: none; background: transparent;
+  border-radius: 14px; cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end; gap: 4px;
+  position: relative; transition: transform .25s var(--ease-spring);
 }
-.dock-app .app-ico { width: 42px; height: 42px; border-radius: 11px; transition: transform .2s var(--ease-spring); }
-.dock-app:hover .app-ico { transform: translateY(-8px) scale(1.15); }
-.dock-app.focused .app-ico { transform: translateY(-3px); }
+.dock-app .app-ico {
+  width: 44px; height: 44px; border-radius: 12px;
+  transition: transform .25s var(--ease-spring);
+  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.3);
+}
+.dock-app:hover .app-ico { transform: translateY(-12px) scale(1.25); }
+.dock-app:active .app-ico { transform: translateY(-6px) scale(1.1); }
+.dock-app.focused .app-ico { transform: translateY(-4px); }
+.dock-app.focused:hover .app-ico { transform: translateY(-12px) scale(1.25); }
 .dock-dot {
-  width: 4px; height: 4px; border-radius: 50%;
-  background: var(--text-dim); flex-shrink: 0;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* 深色主题 Dock 适配 */
+html[data-theme="dark"] .dock {
+  background: rgba(30, 30, 40, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 12px 40px -12px rgba(0, 0, 0, 0.7),
+    0 4px 12px -4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+html[data-theme="dark"] .dock-sep {
+  background: rgba(255, 255, 255, 0.12);
+}
+html[data-theme="dark"] .dock-dot {
+  background: rgba(255, 255, 255, 0.75);
 }
 
 /* ============================================================
