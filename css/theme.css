@@ -536,6 +536,10 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .gl
   /* 窗口轮廓：窗口坐在深色壁纸上时，原来的 1px --border 浅色描边会形成一圈白边。
    * 改成中性内轮廓，深浅壁纸都不刺眼（验收 A8）。 */
   --outline-window: 0 0 0 1px rgba(6, 11, 24, 0.10);
+
+  /* 文件管理器行内图标：介于 sm(30) 与 desk(48) 之间，是独立场景，不硬套现有档。
+   * 待 Pixel 并入 design/tokens.css §10 后可从这里移除。 */
+  --size-fm-icon: 42px;
 }
 
 

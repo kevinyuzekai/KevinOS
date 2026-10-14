@@ -20,19 +20,22 @@
 
   function fileIcon(node) {
     const span = el('span', { class: 'fmi-ico' });
-    const wrap = el('span', { class: 'app-ico sm', style: { width: '42px', height: '42px', borderRadius: '11px' } });
+    // S3：尺寸/圆角交给 .app-ico.fm（--size-fm-icon + 22%），不再写死 42px / 11px
+    const wrap = el('span', { class: 'app-ico fm' });
     if (node.type === 'folder') {
       wrap.style.background = 'linear-gradient(145deg,#ffc24b,#ff9d2e)';
       wrap.innerHTML = `<svg viewBox="0 0 24 24">${K.ICONS.files}</svg>`;
     } else {
       const kind = FS.kind(node.name);
+      // S1：色相跟着"打开它的应用"走（旧色板已废弃）
+      // S2：text / file 改用系统对象键，不再蹭 editor / about
       const map = {
-        image: ['photos', '#4f7cff', '#22d3ee'],
-        audio: ['media', '#9b6bff', '#d38fff'],
-        code: ['code', '#10b981', '#34d399'],
-        text: ['editor', '#64748b', '#94a3b8'],
-        doc: ['editor', '#4f7cff', '#7aa2ff'],
-        file: ['about', '#64748b', '#94a3b8']
+        image: ['photos', '#6D28D9', '#A78BFA'],   // 紫 = 图片家族 photos/gallery
+        audio: ['media',  '#BE123C', '#FB7185'],   // 红 = 音频家族 media/music
+        code:  ['code',   '#4338CA', '#7C7CF5'],   // 靛 = 开发家族 code/terminal
+        text:  ['text',   '#56648A', '#8A98B8'],   // slate 系统对象色
+        doc:   ['editor', '#B45309', '#FBBF24'],   // 琥珀 = 文档家族 office/editor/notes
+        file:  ['file',   '#56648A', '#8A98B8']    // slate 系统对象色
       };
       const [ic, c1, c2] = map[kind] || map.file;
       wrap.style.background = `linear-gradient(145deg,${c1},${c2})`;

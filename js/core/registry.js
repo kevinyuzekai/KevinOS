@@ -19,18 +19,23 @@
     notes: '<path d="M5 3h11l4 4v14H5V3zm10 1.5V7h2.5L15 4.5zM7 11h10v1.6H7V11zm0 4h10v1.6H7V15zm0-8h5v1.6H7V7z"/>',
     settings: '<path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 4c0-.6-.1-1.2-.2-1.8l2-1.5-2-3.4-2.3 1a7 7 0 0 0-3-1.7L15 2H9l-.5 2.6a7 7 0 0 0-3 1.7l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3.6l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 3 1.7L9 22h6l.5-2.6a7 7 0 0 0 3-1.7l2.3 1 2-3.4-2-1.5c.1-.6.2-1.2.2-1.8z"/>',
     store: '<path d="M4 4h16l1 5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0l1-5zm1 7.8A5 5 0 0 0 7 12V20h10v-8a5 5 0 0 0 2-.2V21H5v-9.2z"/>',
-    about: '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>',
+    // B1：about 从「圆圈 i」换成电脑轮廓（显示器+底座），与 info 的「圆圈 i」拆开
+    about: '<path d="M3 4h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-7v2h3v2H7v-2h3v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v8h16V6H4z"/>',
     info: '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>',
     code: '<path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>',
-    office: '<path d="M4 4h16l1 5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0l1-5zm1 7.8A5 5 0 0 0 7 12V20h10v-8a5 5 0 0 0 2-.2V21H5v-9.2z"/>',
+    // B2：office 从「遮阳篷商店」（与 store 完全相同）换成三张叠放的纸
+    office: '<path d="M11 2h6l4 4v9h-2V7l-3-3h-5V2z"/><path d="M7 5h6l4 4v9h-2v-8l-3-3H7V5z"/><path d="M3 8h8l4 4v10H3V8z"/>',
     weather: '<circle cx="8.6" cy="7.4" r="3.1"/><path d="M18 20.2H9.2a4.3 4.3 0 0 1-.5-8.57A5.7 5.7 0 0 1 18.7 13a3.6 3.6 0 0 1-.7 7.2z"/>',
     wifi: '<path d="M12 3C7.5 3 3.5 4.7.6 7.6l1.4 1.4C4.7 6.5 8.2 5 12 5s7.3 1.5 10 4l1.4-1.4C20.5 4.7 16.5 3 12 3zm0 4c-3 0-5.7 1.1-7.8 3l1.4 1.4C7.2 9.8 9.5 9 12 9s4.8.8 6.4 2.4l1.4-1.4C17.7 8.1 15 7 12 7zm0 4c-1.7 0-3.2.6-4.4 1.7l1.4 1.4c.8-.7 1.9-1.1 3-1.1s2.2.4 3 1.1l1.4-1.4C15.2 11.6 13.7 11 12 11zm0 4a2 2 0 0 0-1.4 3.4l1.4 1.6 1.4-1.6A2 2 0 0 0 12 15z"/>',
     'wifi-off': '<path d="M4.3 3 3 4.3l2.9 2.9C4.6 7.8 3.4 8.6 2.4 9.5L3.8 11c.9-.85 1.9-1.5 3-1.95L8.5 10.7C7.1 11.2 5.9 12 4.9 13.1l1.4 1.4c.8-.8 1.8-1.4 2.9-1.7l1.6 1.6c-.9.2-1.7.6-2.4 1.3l1.4 1.4c.6-.6 1.4-.9 2.2-.9l4 4L17 21.5l-3.6-3.6c-.4.2-.9.35-1.4.45V20a2 2 0 0 0 2.8 1.8l1.5-1.5c.7-.7 1.1-1.6 1.4-2.5l4.5 4.5 1.3-1.3L4.3 3zm7.7.05c-2.1 0-4.1.55-5.9 1.5l1.5 1.5A12 12 0 0 1 12 5c3.8 0 7.2 1.5 9.6 4l1.4-1.4C20.4 4.75 16.5 3 12 3.05z"/>',
     image: '<path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 13.5l4.2-5.2 2.6 3.1 3-4 3.2 6.1H5z"/>',
     audio: '<path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/>',
     doc: '<path d="M6 2h8l4 4v16H6V2zm7 1.5V7h3.5L13 3.5z"/>',
+    // S2 系统对象键：折角空白页（无折角线、无横线），与 text（多两行）在轮廓上就不同
+    file: '<path d="M6 2h8l4 4v16H6V2z"/>',
     text: '<path d="M6 2h8l4 4v16H6V2zm7 1.5V7h3.5L13 3.5zM8 11h8v1.6H8V11zm0 4h8v1.6H8V15z"/>',
-    music: '<path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/><path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/>',
+    // B3：原来是把 audio 的 path 重复拼接了两遍，去掉重复的一份（造型待选型后重画）
+    music: '<path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/>',
     // AI 助手专用 glyph：四角星 + 小星，和「关于本机」的 i 区分开
     ai: '<path d="M11 2l1.85 4.95L17.8 8.8l-4.95 1.85L11 15.6 9.15 10.65 4.2 8.8l4.95-1.85L11 2z"/><path d="M18.2 14.2l.85 2.25 2.25.85-2.25.85-.85 2.25-.85-2.25-2.25-.85 2.25-.85.85-2.25z"/>'
   };
@@ -69,13 +74,33 @@
   }
   function installedApps() { return allApps().filter(a => isInstalled(a.id)); }
 
-  /* ---------------- 应用图标渲染 ---------------- */
+  /* ---------------- 应用图标渲染 ----------------
+   * 用户已选定「双色剪影」画法：白色主形 + 一层浅色半透明副形。
+   * 小尺寸下两层会糊，所以按「容器档位」决定是否注入副形。本函数已改成
+   * 可分支的结构，但副形编码与阈值待 Pixel 定稿 —— 在那之前
+   * SUB_GLYPH_MIN_PX = 0，subGlyphFor() 恒返回空串，DOM 与改造前完全一致。
+   * ------------------------------------------------------------------ */
+  const SUB_GLYPH_MIN_PX = 0;                    // 待 Pixel 填：容器短边 ≥ 此值才注入副形
+  const CLS_PX = { '': 48, lg: 56, fm: 42, sm: 30 };  // 各档位对应的短边 px（20 的标题栏也用 sm）
+  const SUB_GLYPHS = {};                         // 副形 path 表：{'<icon 键>': '<path …>'}，待定稿
+
+  function subGlyphFor(app, cls) {
+    if (!SUB_GLYPH_MIN_PX) return '';            // 阈值未定 → 永不注入
+    const px = CLS_PX[cls] !== undefined ? CLS_PX[cls] : CLS_PX[''];
+    if (px < SUB_GLYPH_MIN_PX) return '';        // 太小 → 只渲染主形
+    return SUB_GLYPHS[app.icon] || '';
+  }
+
   function appIconEl(app, cls) {
     const el = document.createElement('div');
-    el.className = 'app-ico ' + (cls || '');
+    const c = cls || '';
+    el.className = 'app-ico' + (c ? ' ' + c : '');
     const g = app.gradient || ['#2C5AE0', '#4F7CFF'];
     el.style.background = `linear-gradient(145deg, ${g[0]}, ${g[1]})`;
-    el.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[app.icon] || ICONS.about}</svg>`;
+    const sub = subGlyphFor(app, c);
+    el.innerHTML = (sub ? `<svg viewBox="0 0 24 24" class="glyph-sub">${sub}</svg>` : '')
+      + `<svg viewBox="0 0 24 24">${ICONS[app.icon] || ICONS.about}</svg>`;
+    if (sub) el.classList.add('has-sub');
     return el;
   }
   function iconEl(name, color) {

@@ -122,7 +122,7 @@
       if (node.type === 'folder') {
         imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#ffc24b,#ff9d2e)"><svg viewBox="0 0 24 24">${K.ICONS.files}</svg></span>`;
       } else {
-        imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#56648A,#8A98B8)"><svg viewBox="0 0 24 24">${K.ICONS.editor}</svg></span>`;
+        imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#56648A,#8A98B8)"><svg viewBox="0 0 24 24">${K.ICONS.text}</svg></span>`;
       }
       wrap.append(imgWrap, el('div', { class: 'di-label', text: node.name }));
 
@@ -277,7 +277,7 @@
       { on: st.theme === 'dark', ico: 'image', t1: '深色模式', t2: st.theme === 'dark' ? '已开启' : '已关闭', act: () => { K.system.setTheme(st.theme === 'dark' ? 'light' : 'dark'); renderActionCenter(); } },
       { on: navigator.onLine, ico: navigator.onLine ? 'wifi' : 'wifi-off', t1: '网络', t2: netTypeLabel(netInfo()), act: () => { closeActionCenter(); openWifiPanel(); } },
       { on: false, ico: 'media', t1: '蓝牙', t2: '未连接', act: () => notify({ title: '蓝牙', body: '正在搜索设备…' }) },
-      { on: st.glass, ico: 'about', t1: '透明效果', t2: '亚克力材质', act: () => { st.glass = !st.glass; K.system.applySettings(); renderActionCenter(); } }
+      { on: st.glass, ico: 'info', t1: '透明效果', t2: '亚克力材质', act: () => { st.glass = !st.glass; K.system.applySettings(); renderActionCenter(); } }
     ];
     defs.forEach(d => {
       const t = el('div', { class: 'ac-toggle' + (d.on ? ' on' : '') }, [
@@ -502,7 +502,7 @@
     });
     files.slice(0, 12).forEach(f => {
       const it = el('div', { class: 'start-app' }, [
-        el('span', { class: 'app-ico', style: { background: 'linear-gradient(145deg,#56648A,#8A98B8)' }, html: `<svg viewBox="0 0 24 24">${K.ICONS.editor}</svg>` }),
+        el('span', { class: 'app-ico', style: { background: 'linear-gradient(145deg,#56648A,#8A98B8)' }, html: `<svg viewBox="0 0 24 24">${K.ICONS.text}</svg>` }),
         el('div', { class: 'sa-name', text: f.node.name })
       ]);
       it.addEventListener('click', () => {
