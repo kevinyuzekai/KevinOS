@@ -22,7 +22,7 @@
   function toast(n) {
     const stack = document.getElementById('toast-stack');
     const app = n.app ? K.apps.getApp(n.app) : null;
-    const grad = app ? app.gradient : ['#4f7cff', '#7aa2ff'];
+    const grad = app ? app.gradient : ['#2C5AE0', '#4F7CFF'];
     const t = el('div', { class: 'toast' }, [
       el('div', { class: 't-ico', style: { background: `linear-gradient(145deg,${grad[0]},${grad[1]})` }, html: `<svg viewBox="0 0 24 24" class="ico">${K.ICONS[app ? app.icon : (n.icon || 'info')] || K.ICONS.info}</svg>` }),
       el('div', {}, [el('div', { class: 't-title', text: n.title }), n.body ? el('div', { class: 't-body', text: n.body }) : null])
@@ -122,7 +122,7 @@
       if (node.type === 'folder') {
         imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#ffc24b,#ff9d2e)"><svg viewBox="0 0 24 24">${K.ICONS.files}</svg></span>`;
       } else {
-        imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#64748b,#94a3b8)"><svg viewBox="0 0 24 24">${K.ICONS.editor}</svg></span>`;
+        imgWrap.innerHTML = `<span class="app-ico" style="background:linear-gradient(145deg,#56648A,#8A98B8)"><svg viewBox="0 0 24 24">${K.ICONS.editor}</svg></span>`;
       }
       wrap.append(imgWrap, el('div', { class: 'di-label', text: node.name }));
 
@@ -202,7 +202,8 @@
       // 非首次渲染时跳过人场动画，避免窗口变化时图标闪烁
       if (!dockFirstRender) item.style.animation = 'none';
       const ico = K.apps.appIconEl(app);
-      ico.style.width = '44px'; ico.style.height = '44px'; ico.style.borderRadius = '12px';
+      // 尺寸/圆角交给 CSS（.dock-app .app-ico 统一 48px + 22%），不要在 JS 里写死，
+      // 否则 .dock-item 与 .dock-app 两套样式永远对不齐（规范 P16）。
       item.appendChild(ico);
       if (isRunning) item.appendChild(el('span', { class: 'dock-dot' }));
       item.addEventListener('click', () => {
@@ -501,7 +502,7 @@
     });
     files.slice(0, 12).forEach(f => {
       const it = el('div', { class: 'start-app' }, [
-        el('span', { class: 'app-ico', style: { background: 'linear-gradient(145deg,#64748b,#94a3b8)' }, html: `<svg viewBox="0 0 24 24">${K.ICONS.editor}</svg>` }),
+        el('span', { class: 'app-ico', style: { background: 'linear-gradient(145deg,#56648A,#8A98B8)' }, html: `<svg viewBox="0 0 24 24">${K.ICONS.editor}</svg>` }),
         el('div', { class: 'sa-name', text: f.node.name })
       ]);
       it.addEventListener('click', () => {

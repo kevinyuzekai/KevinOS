@@ -9,7 +9,7 @@
 
   K.registerApp({
     id: 'editor', name: '文本编辑器', icon: 'editor',
-    gradient: ['#4f7cff', '#7aa2ff'], pinned: false, category: '办公',
+    gradient: ['#B45309', '#FBBF24'], pinned: false, category: '办公',
     size: { w: 840, h: 620 },
     mount(win, args) {
       let path = args.path || null;

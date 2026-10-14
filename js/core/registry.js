@@ -30,7 +30,9 @@
     audio: '<path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/>',
     doc: '<path d="M6 2h8l4 4v16H6V2zm7 1.5V7h3.5L13 3.5z"/>',
     text: '<path d="M6 2h8l4 4v16H6V2zm7 1.5V7h3.5L13 3.5zM8 11h8v1.6H8V11zm0 4h8v1.6H8V15z"/>',
-    music: '<path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/><path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/>'
+    music: '<path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/><path d="M12 3v11.6A3.5 3.5 0 1 0 14 18V7h4V3h-6z"/>',
+    // AI 助手专用 glyph：四角星 + 小星，和「关于本机」的 i 区分开
+    ai: '<path d="M11 2l1.85 4.95L17.8 8.8l-4.95 1.85L11 15.6 9.15 10.65 4.2 8.8l4.95-1.85L11 2z"/><path d="M18.2 14.2l.85 2.25 2.25.85-2.25.85-.85 2.25-.85-2.25-2.25-.85 2.25-.85.85-2.25z"/>'
   };
 
   /* ---------------- 应用注册 ---------------- */
@@ -71,7 +73,7 @@
   function appIconEl(app, cls) {
     const el = document.createElement('div');
     el.className = 'app-ico ' + (cls || '');
-    const g = app.gradient || ['#4f7cff', '#7aa2ff'];
+    const g = app.gradient || ['#2C5AE0', '#4F7CFF'];
     el.style.background = `linear-gradient(145deg, ${g[0]}, ${g[1]})`;
     el.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[app.icon] || ICONS.about}</svg>`;
     return el;
@@ -79,7 +81,7 @@
   function iconEl(name, color) {
     const span = document.createElement('span');
     span.className = 'app-ico sm';
-    span.style.background = color || 'linear-gradient(145deg,#4f7cff,#7aa2ff)';
+    span.style.background = color || 'linear-gradient(145deg,#2C5AE0,#4F7CFF)';
     span.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[name] || ICONS.about}</svg>`;
     return span;
   }

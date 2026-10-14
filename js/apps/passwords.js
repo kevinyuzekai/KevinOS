@@ -26,7 +26,7 @@
 
   K.registerApp({
     id: 'passwords', name: '密码管理', icon: 'settings', installable: true,
-    gradient: ['#64748b', '#475569'], category: '安全',
+    gradient: ['#9A3412', '#F97316'], category: '安全',
     size: { w: 720, h: 560 },
     mount(win) {
       let vault = loadVault();

@@ -24,7 +24,7 @@
 
   K.registerApp({
     id: 'reader', name: '阅读器', icon: 'doc', installable: true,
-    gradient: ['#14b8a6', '#10b981'], category: '阅读',
+    gradient: ['#B45309', '#FBBF24'], category: '阅读',
     size: { w: 720, h: 600 },
     mount(win) {
       const content = el('div', { class: 'reader-content' });

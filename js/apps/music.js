@@ -12,7 +12,7 @@
 
   K.registerApp({
     id: 'music', name: '音乐', icon: 'media', installable: true,
-    gradient: ['#ec4899', '#f43f5e'], category: '媒体',
+    gradient: ['#BE123C', '#FB7185'], category: '媒体',
     size: { w: 520, h: 640 },
     mount(win) {
       let tracks = loadList();

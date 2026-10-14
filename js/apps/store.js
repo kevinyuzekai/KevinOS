@@ -38,7 +38,7 @@
 
   K.registerApp({
     id: 'store', name: '应用商店', icon: 'store',
-    gradient: ['#f5b942', '#ff8a3d'], pinned: true, category: '系统',
+    gradient: ['#2C5AE0', '#4F7CFF'], pinned: true, category: '系统',
     size: { w: 880, h: 680 },
     mount(win) {
       const hero = el('div', { class: 'store-hero' }, [

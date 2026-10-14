@@ -23,7 +23,7 @@
 
   K.registerApp({
     id: 'media', name: '媒体播放器', icon: 'media',
-    gradient: ['#9b6bff', '#d38fff'], pinned: false, category: '媒体',
+    gradient: ['#BE123C', '#FB7185'], pinned: false, category: '媒体',
     size: { w: 420, h: 620 },
     mount(win, args) {
       let current = 0, playing = false, progress = 0, duration = 30;

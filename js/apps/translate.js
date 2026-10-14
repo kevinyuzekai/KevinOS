@@ -16,7 +16,7 @@
 
   K.registerApp({
     id: 'translate', name: '翻译', icon: 'about', installable: true,
-    gradient: ['#06b6d4', '#3b82f6'], category: '工具',
+    gradient: ['#0E7490', '#22D3EE'], category: '工具',
     size: { w: 680, h: 520 },
     mount(win) {
       const srcSel = el('select', { class: 'tr-sel' });

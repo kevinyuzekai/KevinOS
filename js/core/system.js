@@ -43,6 +43,8 @@
 
   const DEFAULTS = {
     theme: 'dark', accent: 'blue', wallpaper: 0,
+    // material：auto（默认，浅色磨砂 / 深色自动极光） / frost / aurora
+    material: 'auto',
     showDesktopIcons: true, glass: true, animations: true, snap: true,
     brightness: 100, volume: 60
   };
@@ -63,11 +65,19 @@
     html.setAttribute('data-theme', settings.theme);
     html.setAttribute('data-accent', settings.accent);
     html.setAttribute('data-anim', settings.animations ? 'on' : 'off');
+    // 材质：auto（默认）/ frost / aurora；玻璃开关单独走 data-glass。
+    // auto 不需要 JS：浅色用 :root 默认（磨砂），深色由
+    // html[data-theme="dark"][data-material="auto"] 自动切极光。
+    html.setAttribute('data-material', settings.material || 'auto');
+    html.setAttribute('data-glass', settings.glass ? 'on' : 'off');
     document.body.classList.toggle('theme-glass', !!settings.glass);
 
     const wp = wallpapers[settings.wallpaper] || wallpapers[0];
     const wall = document.getElementById('wallpaper');
     if (wall) wall.style.background = wp.bg;
+    // 壁纸明度档：桌面图标标签 / 壁纸遮罩跟随"壁纸"，不跟随主题（验收 S1）。
+    // 浅色主题配深色壁纸是常见组合，若按主题切标签色会变成深字压深底（1.07:1）。
+    html.setAttribute('data-wall', wp.mode);
 
     html.style.setProperty('--wall-brightness', String(settings.brightness / 100));
 
@@ -79,6 +89,12 @@
   function setTheme(t) { settings.theme = t; applySettings(); if (K.desktop) K.desktop.renderActionCenter(); }
   function getTheme() { return settings.theme; }
   function setAccent(a) { settings.accent = a; applySettings(); }
+  // 材质切换：auto（自动）/ frost（磨砂，方向 A） / aurora（极光，方向 B），共用同一套令牌
+  function setMaterial(m) {
+    settings.material = (m === 'frost' || m === 'aurora') ? m : 'auto';
+    applySettings();
+    if (K.desktop) K.desktop.renderActionCenter();
+  }
   function setWallpaper(i) { settings.wallpaper = ((i % wallpapers.length) + wallpapers.length) % wallpapers.length; applySettings(); }
   function setBrightness(v) { settings.brightness = v; applySettings(); }
   function setVolume(v) { settings.volume = v; persist(); }
@@ -285,7 +301,7 @@
   }
 
   K.system = {
-    settings, getTheme, setTheme, setAccent, setWallpaper, setBrightness, setVolume,
+    settings, getTheme, setTheme, setAccent, setMaterial, setWallpaper, setBrightness, setVolume,
     applySettings, uptimeText, bootTimeText, shutdown, reboot, sleep,
     wallpapers, boot
   };

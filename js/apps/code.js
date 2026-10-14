@@ -109,7 +109,7 @@
   /* ---------------- 注册应用 ---------------- */
   K.registerApp({
     id: 'code', name: '代码编辑器', icon: 'code',
-    gradient: ['#0ea5e9', '#2563eb'], pinned: true, category: '开发',
+    gradient: ['#4338CA', '#7C7CF5'], pinned: true, category: '开发',
     size: { w: 1040, h: 680 },
     mount(win, args) {
       const state = { docs: [], active: -1, expanded: new Set(['/Home', '/Home/Documents', '/Home/Desktop']), view: 'explorer' };

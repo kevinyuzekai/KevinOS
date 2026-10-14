@@ -8,7 +8,7 @@
 
   K.registerApp({
     id: 'clock', name: '时钟', icon: 'calendar',
-    gradient: ['#6366f1', '#8b5cf6'], category: '工具',
+    gradient: ['#2C5AE0', '#4F7CFF'], category: '工具',
     size: { w: 480, h: 560 },
     mount(win) {
       const tabs = el('div', { class: 'clock-tabs' });

@@ -374,7 +374,7 @@
    * ============================================================ */
   K.registerApp({
     id: 'office', name: 'KOffice', icon: 'office',
-    gradient: ['#e2483d', '#f5732c'], pinned: true, category: '办公',
+    gradient: ['#B45309', '#FBBF24'], pinned: true, category: '办公',
     size: { w: 1100, h: 720 },
     mount(win, args) {
       const state = { docs: [], active: null, seq: 0 };

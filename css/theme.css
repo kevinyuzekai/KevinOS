@@ -1,86 +1,556 @@
-/* ===== KevinOS · Theme tokens & Boot ===== */
+/* ===== KevinOS · Theme tokens & Boot =====
+ * 令牌层唯一事实来源：Pixel《设计规范 v2.1》定稿（design/tokens.css，含 --fs-56/--fs-72）。
+ * 方向 A 深海（磨砂）为默认材质，方向 B 极光用于深色/可选。
+ * data-material 三档：auto（默认，浅色磨砂 / 深色自动极光）/ frost / aurora。
+ * data-wall 二档：dark | light —— 桌面图标标签跟随"壁纸明度"，不跟随主题（验收 S1）。
+ * 组件里禁止再出现字面量色值、圆角、间距、字号，一律走 var()。
+ */
+
 :root {
-  /* 品牌色 —— 取自 LOGO 的深海军蓝 */
-  --brand: #1b2a4a;
-  --brand-2: #24365f;
-  --brand-ink: #0e1526;
+  /* ---------------------------------------------------------------
+   * 1. 品牌色阶 —— KevinOS Navy
+   * 单一色相 8 级明度。整个系统的"厚度"由它建立，而不是靠阴影。
+   * ------------------------------------------------------------- */
+  --navy-950: #060B16;
+  --navy-900: #0A0F1C;
+  --navy-800: #101728;
+  --navy-700: #141B2D;
+  --navy-600: #1B2438;
+  --navy-500: #26304A;
+  --navy-400: #38445F;
+  --navy-300: #56648A;
+  --navy-200: #8A98B8;
+  --navy-100: #C6D0E4;
+  --navy-50:  #EEF1F8;
+  /* 品牌主标色（LOGO 深海军蓝，保留） */
+  --brand:      #1B2A4A;
+  --brand-deep: #24365F;
 
-  --accent: #4f7cff;
-  --accent-2: #7aa2ff;
-  --accent-soft: rgba(79, 124, 255, 0.16);
-  --accent-glow: rgba(79, 124, 255, 0.45);
+  /* ---------------------------------------------------------------
+   * 2. 强调色 —— 三层，职责严格分离
+   *   --accent        实心背景色，必须能承载白色文字（对比度 ≥ 4.5）
+   *   --accent-text   当文字/图标用，必须在所在底色上 ≥ 4.5
+   *   --accent-bright 仅用于发光、焦点环、图形渐变，不承载文字
+   * 旧值 #4F7CFF 作为背景时白字对比度仅 3.71，不达标，已降级为 bright。
+   * ------------------------------------------------------------- */
+  --accent:        #2C5AE0;   /* 白字 5.76 ✓ */
+  --accent-text:   #2C5AE0;   /* on #F4F6FB 5.33 ✓ */
+  --accent-hover:  #2449C4;
+  --accent-active: #1D3CA6;
+  --accent-bright: #4F7CFF;   /* 仅发光/焦点环 */
+  --accent-fg:     #FFFFFF;
+  --accent-subtle: #E7EDFD;   /* 12% 视觉重量的实心底 */
+  --accent-ring:   rgba(79, 124, 255, 0.42);
+  --accent-glow:   rgba(79, 124, 255, 0.45);
 
-  --good: #2ecc71;
-  --warn: #f5b942;
-  --danger: #ff5c5c;
-  --purple: #9b6bff;
+  /* 语义色（浅色主题：作为文字/图标时全部 ≥ 4.5） */
+  --success:      #0A7A50;  /* 白字 5.37 ✓ */
+  --success-soft: #E3F5EC;
+  --warning:      #B45309;  /* 白字 5.02 ✓ */
+  --warning-soft: #FDF0DC;
+  --danger:       #B42318;  /* 白字 6.57 ✓ */
+  --danger-soft:  #FCE8E6;
+  --purple:       #6D28D9;  /* 白字 7.10 ✓ */
+  --purple-soft:  #F0E9FE;
+  --info:         #0E7490;
+  --info-soft:    #E0F2F7;
 
-  /* 亮色（默认） */
-  --bg: #eef1f8;
-  --text: #14203a;
-  --text-dim: #5a6785;
-  --surface: rgba(255, 255, 255, 0.72);
-  --surface-solid: #ffffff;
-  --surface-2: rgba(255, 255, 255, 0.55);
-  --stroke: rgba(20, 32, 58, 0.10);
-  --stroke-strong: rgba(20, 32, 58, 0.18);
-  --shadow-window: 0 24px 70px -18px rgba(11, 20, 45, 0.55), 0 4px 14px rgba(11, 20, 45, 0.18);
-  --shadow-panel: 0 20px 60px -14px rgba(11, 20, 45, 0.42);
-  --bar-bg: rgba(255, 255, 255, 0.66);
-  --bar-stroke: rgba(255, 255, 255, 0.5);
-  --scrollbar: rgba(20, 32, 58, 0.22);
-  --scrollbar-hover: rgba(20, 32, 58, 0.4);
-  --blur: 26px;
+  /* 实心语义按钮：**底** 与 **其上的文字** 必须成对，不能拿 --danger 配 --accent-fg（白）。
+   * 原因：--danger/--success/--warning 在深色下是「亮色」（为深底上的文字优化），
+   * 拿它们当实心底 + 白字会翻车 —— 实测深色 danger #F87171 + 白 = 2.77:1，success 1.92，warning 1.67。
+   * 规则：浅色 = 深底 + 白字；深色 = 亮底 + 深字（--navy-950 系的 ink）。见《规范 §3.13》。 */
+  --danger-solid:  #B42318;   --danger-on-solid:  #FFFFFF;   /* 6.57 ✓ */
+  --success-solid: #0A7A50;   --success-on-solid: #FFFFFF;   /* 5.37 ✓ */
+  --warning-solid: #B45309;   --warning-on-solid: #FFFFFF;   /* 5.02 ✓ */
 
-  --radius: 14px;
-  --radius-lg: 20px;
-  /* 丝滑缓动曲线：标准缓出 + 柔和弹性 */
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur: 0.3s;
-  --dur-fast: 0.18s;
-  --dur-slow: 0.5s;
+  /* ---------------------------------------------------------------
+   * 3. 表面与文字（浅色主题）
+   * 层级用"明度递增"表达：桌面底 < 应用底 < 卡片 < 浮起
+   * ------------------------------------------------------------- */
+  --bg:            #F4F6FB;   /* 桌面 / 窗口外底 */
+  --bg-sunken:     #EAEEF7;   /* 凹陷区：侧栏、状态栏 */
+  --surface:       #FFFFFF;   /* 窗口主体 / 卡片 */
+  --surface-raised:#FFFFFF;   /* 浮起卡片 + shadow-1 */
+  --surface-sunken:#F0F3FA;   /* 输入框、代码块、列表 hover 基 */
+  --surface-inverse: var(--navy-700);
+
+  --text:            #0F1A2E;  /* 主文字 16.08 ✓ */
+  --text-secondary:  #5C6B8A;  /* 次级   5.35 ✓ */
+  --text-tertiary:   #5F6E8C;  /* 提示   5.13 ✓ */
+  --text-disabled:   #A9B4C8;  /* 禁用（豁免对比度） */
+  --text-on-accent:  #FFFFFF;
+  --text-inverse:    #EEF1F8;
+
+  --border:        #DDE3EF;   /* 常规描边 */
+  --border-strong: #C3CDE0;   /* 输入框、表头分隔 */
+  --divider:       rgba(15, 26, 46, 0.08);
+
+  /* 交互叠色（不改文字色，只叠背景） */
+  --hover-overlay:    rgba(15, 26, 46, 0.05);
+  --pressed-overlay:  rgba(15, 26, 46, 0.09);
+  --selected-overlay: rgba(44, 90, 224, 0.10);
+
+  /* 壁纸与桌面专属（解决现有"图标标签永远白字"在浅壁纸上不可读的问题） */
+  /* 桌面专属令牌跟随「壁纸明度」，不跟随主题 —— 壁纸和深浅色是两套独立设置，
+   * 浅色主题配深色壁纸是常见组合。由 JS 写 <html data-wall="dark|light">，
+   * 取值直接用 system.js wallpapers[] 里已有的 mode 字段。详见 §3.6 / §3.11。
+   * 下面这组是深色壁纸的默认值（DEFAULTS.wallpaper = 0「深海蓝」是深色壁纸）。 */
+  --wallpaper-overlay: linear-gradient(180deg, rgba(4, 7, 14, 0.10), rgba(4, 7, 14, 0.34));
+  --desk-label:        #F2F5FC;
+  --desk-label-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+  --desk-icon-hover:   rgba(255, 255, 255, 0.14);
+  /* --wallpaper 仅供设计稿/文档参考：实际壁纸由 system.js 直接写 background，不走此令牌 */
+  --wallpaper: radial-gradient(120% 120% at 20% 10%, #1E3A8A 0%, #0B1229 45%, #05070F 100%);
+
+  /* ---------------------------------------------------------------
+   * 4. 材质 —— 玻璃只允许出现在 3 类表面
+   *   ① 顶部菜单栏  ② Dock  ③ 悬浮层（弹层/面板/菜单/OSD/Toast）
+   *   窗口、对话框、应用内部一律实心。这是本次重做的核心纪律。
+   * ------------------------------------------------------------- */
+  --material-mode: frost;                 /* 仅作标记，真实判定用 [data-material] */
+  --blur: 24px;                           /* frost:24  aurora:40 */
+  --blur-strong: 32px;                    /* 必须与 [data-material="frost"] 一致：
+                                           * auto + 浅色 == frost，两者不能给出不同的模糊值 */
+  --saturate: 170%;                       /* frost:170% aurora:200% */
+  --glass-bg:      rgba(255, 255, 255, 0.72);
+  --glass-bg-deep: rgba(255, 255, 255, 0.62);  /* 菜单栏/Dock 更深一档 */
+  --glass-border:  rgba(255, 255, 255, 0.55);
+  --glass-edge:    inset 0 1px 0 rgba(255, 255, 255, 0.75);  /* 顶边高光 */
+  --glass-glow:    none;                  /* aurora 下才有彩色边缘光 */
+  --noise: none;                          /* aurora 下的噪点叠层 */
+
+  /* ---------------------------------------------------------------
+   * 5. 阴影 / 高程 —— 5 级，克制使用
+   * ------------------------------------------------------------- */
+  --shadow-1: 0 1px 2px rgba(15, 26, 46, 0.06), 0 1px 1px rgba(15, 26, 46, 0.04);
+  --shadow-2: 0 4px 12px -2px rgba(15, 26, 46, 0.10), 0 2px 4px -2px rgba(15, 26, 46, 0.06);
+  --shadow-3: 0 16px 40px -12px rgba(15, 26, 46, 0.22), 0 4px 12px -4px rgba(15, 26, 46, 0.10);
+  --shadow-4: 0 28px 64px -20px rgba(6, 11, 24, 0.38), 0 8px 20px -8px rgba(6, 11, 24, 0.20); /* 窗口·失焦 */
+  --shadow-window: 0 40px 92px -24px rgba(6, 11, 24, 0.50), 0 12px 28px -10px rgba(6, 11, 24, 0.28); /* 窗口·聚焦 */
+  --shadow-dock: 0 18px 48px -14px rgba(6, 11, 24, 0.34), 0 4px 12px -4px rgba(6, 11, 24, 0.16);
+  --shadow-focus: 0 0 0 3px var(--accent-ring);
+
+  /* ---------------------------------------------------------------
+   * 6. 圆角 —— 6 级，替代现有 22 种散值
+   * 尺度经过对现有用量的对齐（8px 27处 / 10px 26 / 12px 19 / 14px 15 /
+   * 9px 11 / 4px 11 / 6px 9 / 11px 8 / 16px 7），把迁移成本压到最低：
+   *   4·5·6·7  → 6     8·9 → 8     10·11·12 → 12     13·14·15·16 → 16
+   *   18·19·20·22·24 → 22
+   * ------------------------------------------------------------- */
+  --radius-xs:    6px;   /* 徽标、chip、极小标签、迷你图标 */
+  --radius-sm:    8px;   /* 菜单项、输入框、小按钮、列表块 */
+  --radius-md:   12px;   /* 标准按钮、卡片、弹层内的块 */
+  --radius-lg:   16px;   /* 窗口、弹出面板、对话框、卡片容器 */
+  --radius-xl:   22px;   /* Dock、启动台搜索框 */
+  --radius-full: 999px;  /* 胶囊、圆点、头像 */
+
+  /* ---------------------------------------------------------------
+   * 7. 间距 —— 4pt 基数，只允许用这 9 档
+   * ------------------------------------------------------------- */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ---------------------------------------------------------------
+   * 8. 字体与字阶 —— 9 档，替代现有 30 种散值
+   * ------------------------------------------------------------- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text",
+               "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC",
+               system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas,
+               "Courier New", monospace;
+
+  --fs-11: 11px;   /* 极小的辅助标记、徽标 */
+  --fs-12: 12px;   /* 标签、快捷键、次级说明 */
+  --fs-13: 13px;   /* 系统正文（默认） */
+  --fs-14: 14px;   /* 大正文、输入框 */
+  --fs-16: 16px;   /* 面板标题 */
+  --fs-20: 20px;   /* 区块标题 */
+  --fs-24: 24px;   /* 页面主标题 */
+  --fs-32: 32px;   /* 展示型数字 */
+  --fs-48: 48px;   /* 空状态主数字、睡眠屏副标题 */
+  /* 显示级（v2.4 新增）：只给"大号数字/超大标题"用，不要拿来做正文 */
+  --fs-56: 56px;   /* 时钟widget、小屏天气温度 */
+  --fs-72: 72px;   /* 天气温度 */
+  /* 注意：emoji 的 font-size 只是"图形尺寸"，不入字阶，见 §3.12 */
+
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  /* 注意：不再使用 650 这类非标字重，避免不同平台回退不一致 */
+
+  --lh-tight:   1.25;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.65;
+
+  --ls-tight:  -0.011em;  /* ≥20px 标题 */
+  --ls-normal: 0;
+  --ls-wide:   0.04em;    /* 全大写小标签 */
+
+  /* ---------------------------------------------------------------
+   * 9. 动效
+   * --ease-standard 替代旧的 cubic-bezier(.16,1,.3,1)：后者入场过冲、出场别扭
+   * ------------------------------------------------------------- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter:    cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-exit:     cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-spring:   cubic-bezier(0.34, 1.3, 0.64, 1);   /* 只用于窗口/面板出现 */
+
+  --dur-instant: 80ms;   /* 按下反馈 */
+  --dur-fast:   120ms;   /* hover / 颜色 */
+  --dur-base:   200ms;   /* 面板进出、下拉展开 */
+  --dur-slow:   280ms;   /* 窗口开合、最大化 */
+
+  /* ---------------------------------------------------------------
+   * 10. 组件尺寸（Dev 直接取用，不要各写各的）
+   * ------------------------------------------------------------- */
+  --h-menubar:   30px;
+  --h-titlebar:  40px;
+  --h-btn-sm:    28px;
+  --h-btn-md:    36px;
+  --h-btn-lg:    44px;
+  --h-input:     36px;
+  --h-input-lg:  44px;
+  --h-row:       40px;
+  --h-row-tight: 32px;
+  --h-dock:      64px;
+  --size-dock-icon: 48px;
+  --size-desk-icon: 48px;
+  --size-lp-icon:   72px;
+  --size-titlebar-icon: 20px;
+  --size-icon:   16px;    /* 行内图标统一 16px */
+  --w-sidebar:   216px;
+
+  --z-desktop:  0;
+  --z-deskicon: 1;
+  --z-widget:   2;
+  --z-window:   100;
+  --z-menubar:  501;
+  --z-dock:     500;
+  --z-panel:    600;
+  --z-menu:     900;
+  --z-toast:    950;
+  --z-dialog:   9000;
+
+  /* ---------------------------------------------------------------
+   * 11. 沉浸式画布（Canvas）令牌
+   * 终端 / 代码编辑器 / 媒体播放器 / 相册 / PDF 预览 / AI 对话 这类
+   * "内容即深色"的应用，保留深色画布，但外壳跟随系统主题。
+   * 具体规则见《设计规范 §3.9 应用主题策略》。
+   * ------------------------------------------------------------- */
+  --canvas-bg:      #0A0F1C;                    /* 画布底 */
+  --canvas-bg-2:    #101728;                    /* 画布内的次级面（行、工具条） */
+  --canvas-border:  rgba(255, 255, 255, 0.08);  /* 画布内分隔 */
+  --canvas-border-strong: rgba(255, 255, 255, 0.14);
+  --canvas-fg:      #D7DEEA;                    /* on --canvas-bg 14.14 ✓ */
+  --canvas-fg-dim:  #8A98B8;                    /* on --canvas-bg  6.62 ✓ */
+  --canvas-sel:     rgba(79, 124, 255, 0.24);
+  --canvas-shadow:  inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  /* 每个画布应用只允许有 1 个身份色，用于强调，不得用于大面积背景 */
+  --canvas-accent:  #4F7CFF;
+  /* 画布内专用语义色：固定为「深底上的浅色」版本，**不随主题变**。
+   * 原因：主题语义色在浅色下是深绿/深红，放到深色画布上对比度只有 2~3:1。
+   * 画布应用内部一律用这组，禁止使用 --success/--danger/--warning/--info。 */
+  --canvas-fg-bright: #EAF2FF;   /* on --canvas-bg 16.5 ✓ */
+  --canvas-success:   #57D38C;   /* on --canvas-bg 10.6 ✓ */
+  --canvas-warning:   #FFB86C;   /* on --canvas-bg 11.4 ✓ */
+  --canvas-danger:    #FF8080;   /* on --canvas-bg  8.0 ✓ */
+  --canvas-info:      #6FA8FF;   /* on --canvas-bg  8.6 ✓ */
+
+  /* ---------------------------------------------------------------
+   * 12. 窗口交通灯 —— 专用图形色（**不随主题 / 材质变**）
+   *
+   * 为什么不用 --danger / --warning / --success：
+   *   那三个是为「浅底上的文字」优化的（低明度、高对比：白字 5.0~6.6:1）。
+   *   拿它们当 12px 实心圆点用，浅色下会变成暗酒红 / 暗棕 / 暗墨绿，
+   *   hover 时里面 7px 的深色符号也几乎看不见 —— 完全不像红黄绿交通灯。
+   *   实测：.traffic.close = rgb(180,35,24) = --danger(#B42318)，肉眼是黑红色。
+   *
+   * 这三个同时解决了 P5：原来 #ff5f57 与 --danger:#ff5c5c 是两套几乎一样的红，
+   * 现在交通灯有自己命名的一组，与语义色不再语义重叠。
+   *
+   * 用途：`.traffic.close / .minimize / .maximize` 的 background。
+   * 深色主题下也保持不变（对齐 macOS）。
+   * ------------------------------------------------------------- */
+  --traffic-close: #FF5F57;
+  --traffic-min:   #FEBC2E;
+  --traffic-max:   #28C840;
+
+  /* 兼容旧类名：现有代码里的旧变量名全部指向新值，替换 :root 后可平滑过渡。
+   * 注意：这里只做「别名」，绝不重复定义新变量本身，否则会形成循环引用。 */
+  --radius:    var(--radius-md);
+  --ease:      var(--ease-standard);
+  --ease-out:  var(--ease-enter);
+  --ease-in-out: var(--ease-standard);
+  --dur:       var(--dur-base);
+  --surface-solid: var(--surface);
+  --surface-2:     var(--surface-sunken);
+  --surface-3:     var(--surface-sunken);   /* 原为未定义，靠 fallback 兜底 */
+  --surface-1:     var(--surface-sunken);   /* 原为未定义且无 fallback → AI 助手侧栏背景透明，见规范 P15 */
+  --stroke:        var(--border);
+  --stroke-strong: var(--border-strong);
+  --text-dim:      var(--text-secondary);
+  --accent-soft:   var(--accent-subtle);
+  --accent-2:      var(--accent-bright);
+  --brand-2:       var(--brand-deep);
+  --warn:          var(--warning);
+  --bar-bg:        var(--glass-bg-deep);
+  --bar-stroke:    var(--glass-border);
+  --shadow-panel:  var(--shadow-3);
+  --scrollbar:       rgba(15, 26, 46, 0.20);
+  --scrollbar-hover: rgba(15, 26, 46, 0.36);
+  /* 由 JS 注入，这里给默认值，保证首帧不闪 */
+  --dock-i: 0;
+  --wall-brightness: 1;
 }
 
+/* ============================================================================
+ * 深色主题
+ * ========================================================================== */
 html[data-theme="dark"] {
-  --bg: #0b1020;
-  --text: #e7ecf7;
-  --text-dim: #94a2c2;
-  --surface: rgba(24, 32, 56, 0.72);
-  --surface-solid: #161f36;
-  --surface-2: rgba(30, 40, 68, 0.55);
-  --stroke: rgba(255, 255, 255, 0.10);
-  --stroke-strong: rgba(255, 255, 255, 0.18);
-  --shadow-window: 0 30px 80px -20px rgba(0, 0, 0, 0.8), 0 6px 18px rgba(0, 0, 0, 0.55);
-  --shadow-panel: 0 24px 70px -16px rgba(0, 0, 0, 0.7);
-  --bar-bg: rgba(16, 22, 40, 0.66);
-  --bar-stroke: rgba(255, 255, 255, 0.08);
-  --scrollbar: rgba(255, 255, 255, 0.18);
-  --scrollbar-hover: rgba(255, 255, 255, 0.34);
-  --accent-soft: rgba(79, 124, 255, 0.22);
+  --accent:        #3B6BF5;   /* 白字 4.56 ✓ */
+  --accent-text:   #7BA4FF;   /* on #141B2D 7.02 ✓ */
+  --accent-hover:  #5580FF;
+  --accent-active: #2C5AE0;
+  --accent-subtle: rgba(79, 124, 255, 0.18);
+  --accent-ring:   rgba(123, 164, 255, 0.45);
+
+  --success:      #34D399;  --success-soft: rgba(52, 211, 153, 0.16);
+  --warning:      #FBBF24;  --warning-soft: rgba(251, 191, 36, 0.16);
+  --danger:       #F87171;  --danger-soft:  rgba(248, 113, 113, 0.16);
+  --purple:       #A78BFA;  --purple-soft:  rgba(167, 139, 250, 0.16);
+  --info:         #38BDF8;  --info-soft:    rgba(56, 189, 248, 0.16);
+
+  /* 深色下换成亮底 + 深字（白字全部不达标，见 :root 注释） */
+  --danger-solid:  #F87171;   --danger-on-solid:  #0F1A2E;   /* 6.29 ✓ */
+  --success-solid: #34D399;   --success-on-solid: #0F1A2E;   /* 8.68 ✓ */
+  --warning-solid: #FBBF24;   --warning-on-solid: #0F1A2E;   /* 10.07 ✓ */
+
+  --bg:             var(--navy-900);   /* #0A0F1C */
+  --bg-sunken:      #070B16;
+  --surface:        var(--navy-700);   /* #141B2D */
+  --surface-raised: var(--navy-600);   /* #1B2438 */
+  --surface-sunken: var(--navy-800);   /* #101728 */
+  --surface-inverse: var(--navy-50);
+
+  --text:           #E9EDF7;  /* 16.32 ✓ */
+  --text-secondary: #A8B5D1;  /*  8.33 ✓ */
+  --text-tertiary:  #8A98B8;  /*  5.93 ✓ */
+  --text-disabled:  #4A5670;
+  --text-inverse:   #0F1A2E;
+
+  --border:        #26304A;
+  --border-strong: #38445F;
+  --divider:       rgba(255, 255, 255, 0.08);
+
+  --hover-overlay:    rgba(255, 255, 255, 0.06);
+  --pressed-overlay:  rgba(255, 255, 255, 0.10);
+  --selected-overlay: rgba(79, 124, 255, 0.18);
+
+  /* 壁纸与桌面标签已改为跟随 data-wall（见 :root 注释），此处不再按主题覆盖 */
+
+  --glass-bg:      rgba(18, 24, 40, 0.72);
+  --glass-bg-deep: rgba(12, 17, 30, 0.66);
+  --glass-border:  rgba(255, 255, 255, 0.10);
+  --glass-edge:    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.40), 0 1px 1px rgba(0, 0, 0, 0.30);
+  --shadow-2: 0 4px 14px -2px rgba(0, 0, 0, 0.50), 0 2px 5px -2px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 18px 44px -12px rgba(0, 0, 0, 0.66), 0 4px 14px -4px rgba(0, 0, 0, 0.45);
+  --shadow-4: 0 30px 70px -20px rgba(0, 0, 0, 0.72), 0 10px 24px -8px rgba(0, 0, 0, 0.55);
+  --shadow-window: 0 44px 96px -24px rgba(0, 0, 0, 0.80), 0 14px 32px -10px rgba(0, 0, 0, 0.60);
+  --shadow-dock: 0 20px 52px -14px rgba(0, 0, 0, 0.70), 0 6px 16px -6px rgba(0, 0, 0, 0.50);
+
+  --scrollbar:       rgba(255, 255, 255, 0.16);
+  --scrollbar-hover: rgba(255, 255, 255, 0.30);
 }
 
-html[data-theme="dark"] body { background: #05070f; }
+/* ============================================================================
+ * 壁纸明度档（data-wall）—— 桌面图标标签 / 壁纸遮罩跟随它，不跟随主题
+ * JS：applySettings 里 html.setAttribute('data-wall', wp.mode)
+ *     （system.js 的 wallpapers[] 每项已有 mode: 'dark' | 'light'）
+ * ========================================================================== */
+html[data-wall="light"] {
+  --wallpaper-overlay: linear-gradient(180deg, rgba(10, 16, 32, 0.02), rgba(10, 16, 32, 0.09));
+  --desk-label:        #0F1A2E;
+  --desk-label-shadow: 0 1px 2px rgba(255, 255, 255, 0.65);
+  --desk-icon-hover:   rgba(255, 255, 255, 0.42);
+}
 
-/* 强调色主题 */
-html[data-accent="violet"] { --accent: #9b6bff; --accent-2: #bda2ff; --accent-soft: rgba(155,107,255,.2); --accent-glow: rgba(155,107,255,.45); }
-html[data-accent="green"]  { --accent: #10b981; --accent-2: #59d9a8; --accent-soft: rgba(16,185,129,.2); --accent-glow: rgba(16,185,129,.45); }
-html[data-accent="pink"]   { --accent: #ff5c8a; --accent-2: #ff9bb8; --accent-soft: rgba(255,92,138,.2); --accent-glow: rgba(255,92,138,.45); }
-html[data-accent="orange"] { --accent: #ff8a3d; --accent-2: #ffb37a; --accent-soft: rgba(255,138,61,.2); --accent-glow: rgba(255,138,61,.45); }
+/* ============================================================================
+ * 材质：磨砂（方向 A · Deep Sea）
+ * 玻璃只出现在菜单栏 / Dock / 悬浮层，且模糊度低、色调中性
+ * :root 的默认值即为磨砂，因此 data-material="auto" 在浅色下无需额外规则
+ * ========================================================================== */
+html[data-material="frost"] {
+  --material-mode: frost;
+  --blur: 24px;
+  --blur-strong: 32px;
+  --saturate: 170%;
+  --glass-glow: none;
+  --noise: none;
+}
 
-/* 壁纸滤镜（亮度/色调） */
+/* ============================================================================
+ * 材质：极光（方向 B · Aurora）—— 高模糊 + 彩色边缘光 + 噪点
+ * 窗口本身也参与玻璃，层级靠"光"而不是靠阴影
+ *
+ * 两条选择器同时命中：
+ *   ① 用户显式选择 data-material="aurora"（任意主题）
+ *   ② data-material="auto" 且深色主题 —— 用户拍板的默认配对
+ *
+ * 推荐用法：<html data-theme="light|dark" data-material="auto">
+ *   浅色 → 走 :root 的磨砂值；深色 → 自动切极光。不需要 JS 参与。
+ *   用户在设置里手动选材质时，把 data-material 改成 "frost"|"aurora" 即可覆盖。
+ * ========================================================================== */
+html[data-material="aurora"],
+html[data-theme="dark"][data-material="auto"] {
+  --material-mode: aurora;
+  --blur: 40px;
+  --blur-strong: 52px;
+  --saturate: 200%;
+  --glass-glow: 0 0 0 1px rgba(255, 255, 255, 0.10), 0 0 34px -6px var(--accent-glow);
+  --noise: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px);
+}
+html[data-material="aurora"][data-theme="dark"],
+html[data-theme="dark"][data-material="auto"] {
+  --glass-bg:      rgba(22, 30, 52, 0.58);
+  --glass-bg-deep: rgba(14, 20, 36, 0.50);
+  --glass-border:  rgba(255, 255, 255, 0.14);
+}
+
+/* ============================================================================
+ * 强调色主题 —— 每一档同时给出 accent / accent-text / hover / bright
+ * 保证换色后白字与文字对比度仍然达标
+ * ========================================================================== */
+html[data-accent="indigo"] {
+  --accent: #4338CA; --accent-text: #4338CA; --accent-hover: #3730A3; --accent-active: #312E81;
+  --accent-bright: #6366F1; --accent-subtle: #E9E8FD; --accent-ring: rgba(99, 102, 241, 0.42);
+  --accent-glow: rgba(99, 102, 241, 0.45);
+}
+html[data-accent="cyan"] {
+  --accent: #0E7490; --accent-text: #0E7490; --accent-hover: #155E75; --accent-active: #164E63;
+  --accent-bright: #22D3EE; --accent-subtle: #E0F2F7; --accent-ring: rgba(34, 211, 238, 0.42);
+  --accent-glow: rgba(34, 211, 238, 0.45);
+}
+html[data-accent="green"] {
+  --accent: #0A7A50; --accent-text: #0A7A50; --accent-hover: #086243; --accent-active: #064E36;
+  --accent-bright: #34D399; --accent-subtle: #E3F5EC; --accent-ring: rgba(52, 211, 153, 0.42);
+  --accent-glow: rgba(52, 211, 153, 0.45);
+}
+html[data-accent="amber"] {
+  --accent: #B45309; --accent-text: #B45309; --accent-hover: #92400E; --accent-active: #78350F;
+  --accent-bright: #FBBF24; --accent-subtle: #FDF0DC; --accent-ring: rgba(251, 191, 36, 0.45);
+  --accent-glow: rgba(251, 191, 36, 0.45);
+}
+html[data-accent="rose"] {
+  --accent: #BE123C; --accent-text: #BE123C; --accent-hover: #9F1239; --accent-active: #881337;
+  --accent-bright: #FB7185; --accent-subtle: #FDE8ED; --accent-ring: rgba(251, 113, 133, 0.42);
+  --accent-glow: rgba(251, 113, 133, 0.45);
+}
+html[data-accent="violet"] {
+  --accent: #6D28D9; --accent-text: #6D28D9; --accent-hover: #5B21B6; --accent-active: #4C1D95;
+  --accent-bright: #A78BFA; --accent-subtle: #F0E9FE; --accent-ring: rgba(167, 139, 250, 0.42);
+  --accent-glow: rgba(167, 139, 250, 0.45);
+}
+/* 深色下强调色统一提亮，否则"当文字用"会不达标 */
+html[data-theme="dark"][data-accent="indigo"] { --accent: #4F46E5; --accent-text: #A5B4FC; --accent-hover: #6366F1; }
+html[data-theme="dark"][data-accent="cyan"]   { --accent: #0E7490; --accent-text: #67E8F9; --accent-hover: #155E75; }
+html[data-theme="dark"][data-accent="green"]  { --accent: #0E8557; --accent-text: #6EE7B7; --accent-hover: #12A06B; }  /* #0F8A5C 白字只有 4.37，调到 #0E8557 = 4.67 */
+html[data-theme="dark"][data-accent="amber"]  { --accent: #B45309; --accent-text: #FCD34D; --accent-hover: #D97706; }
+html[data-theme="dark"][data-accent="rose"]   { --accent: #BE123C; --accent-text: #FDA4AF; --accent-hover: #E11D48; }
+html[data-theme="dark"][data-accent="violet"] { --accent: #6D28D9; --accent-text: #C4B5FD; --accent-hover: #7C3AED; }
+
+/* ============================================================================
+ * 降级与无障碍
+ * ========================================================================== */
+
+/* 非玻璃模式（设置里的"玻璃模糊"开关关闭 / 低端设备 / 省电） */
+html[data-glass="off"] {
+  --blur: 0px; --blur-strong: 0px; --saturate: 100%;
+  --glass-bg: var(--surface); --glass-bg-deep: var(--surface);
+  --glass-border: var(--border); --glass-edge: none; --glass-glow: none; --noise: none;
+}
+html[data-glass="off"] .glass-surface,
+html[data-glass="off"] .window {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* 减弱动效（系统级 prefers-reduced-motion，当前实现缺失） */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 1ms; --dur-fast: 1ms; --dur-base: 1ms; --dur-slow: 1ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-anim="off"] *, html[data-anim="off"] *::before, html[data-anim="off"] *::after {
+  animation-duration: 1ms !important; animation-delay: 0ms !important; transition-duration: 1ms !important;
+}
+
+/* ============================================================================
+ * 可直接复用的原语（组件只写一次，全系统共享）
+ * ========================================================================== */
+
+/* 三类允许玻璃的表面 */
+.glass-bar  { background: var(--glass-bg-deep); -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--saturate));
+              backdrop-filter: blur(var(--blur)) saturate(var(--saturate)); border-color: var(--glass-border); box-shadow: var(--glass-edge); }
+.glass-panel{ background: var(--glass-bg); -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--saturate));
+              backdrop-filter: blur(var(--blur-strong)) saturate(var(--saturate)); border: 1px solid var(--glass-border);
+              box-shadow: var(--glass-edge), var(--shadow-3), var(--glass-glow); }
+html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .glass-panel::after {
+  content: ''; position: absolute; inset: 0; background: var(--noise); pointer-events: none; border-radius: inherit;
+}
+
+/* 统一的交互态叠层 —— 只叠背景，不动文字色 */
+.interactive { transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard),
+                           transform var(--dur-instant) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard); }
+.interactive:hover   { background-color: var(--hover-overlay); }
+.interactive:active  { background-color: var(--pressed-overlay); transform: scale(0.97); }
+.interactive.selected{ background-color: var(--accent-subtle); box-shadow: inset 0 0 0 1px var(--accent); }
+.interactive:disabled,
+.interactive[disabled]{ opacity: 0.4; cursor: not-allowed; transform: none; background-color: transparent; }
+
+/* 焦点环 —— 全局唯一写法，禁止裸 outline:none */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: inherit;
+}
+/* ============================================================================
+ * 项目补充令牌（tokens.css 之外，由 Dev 维护）
+ * 放在令牌同步段之后，每次从 design/tokens.css 同步都不会被覆盖。
+ * ========================================================================== */
+:root {
+  /* 窗口轮廓：窗口坐在深色壁纸上时，原来的 1px --border 浅色描边会形成一圈白边。
+   * 改成中性内轮廓，深浅壁纸都不刺眼（验收 A8）。 */
+  --outline-window: 0 0 0 1px rgba(6, 11, 24, 0.10);
+}
+
+
+/* 壁纸滤镜（亮度/色调，由 JS 注入 --wall-brightness） */
 .wallpaper { filter: brightness(var(--wall-brightness, 1)); }
 
-/* 通用玻璃拟态 */
+/* 通用玻璃拟态：只允许用在菜单栏 / Dock / 悬浮层 */
 .glass {
-  background: var(--surface);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(180%);
-  backdrop-filter: blur(var(--blur)) saturate(180%);
-  border: 1px solid var(--stroke);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--saturate));
+  backdrop-filter: blur(var(--blur)) saturate(var(--saturate));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-edge);
 }
-
+/* 豁免：开机/关机/锁屏独立视觉层，不参与主题，允许字面量色值（规范 §3.12） */
 /* ============ 开机动画（居中终端风格） ============ */
 .boot-screen {
   position: fixed;
@@ -186,6 +656,7 @@ html[data-accent="orange"] { --accent: #ff8a3d; --accent-2: #ffb37a; --accent-so
   .boot-title { font-size: 20px; }
 }
 
+/* 豁免：开机/关机/锁屏独立视觉层，不参与主题，允许字面量色值（规范 §3.12） */
 /* 关机遮罩 */
 .shutdown-veil {
   position: fixed; inset: 0; z-index: 9998;
@@ -197,6 +668,7 @@ html[data-accent="orange"] { --accent: #ff8a3d; --accent-2: #ffb37a; --accent-so
 .shutdown-veil.show { opacity: 1; pointer-events: auto; }
 .shutdown-veil .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,.15); border-top-color: var(--accent); animation: spin .9s linear infinite; }
 
+/* 豁免：开机/关机/锁屏独立视觉层，不参与主题，允许字面量色值（规范 §3.12） */
 /* 睡眠 / 屏保 */
 .sleep-screen {
   position: fixed; inset: 0; z-index: 9997;
@@ -230,7 +702,7 @@ html[data-accent="orange"] { --accent: #ff8a3d; --accent-2: #ffb37a; --accent-so
 @keyframes pulse { 0%,100% { opacity: .35; } 50% { opacity: .75; } }
 
 /* 全局过渡 —— 主题切换丝滑感 */
-body, .taskbar, .start-menu, .action-center, .context-menu, .window, .taskbar-search {
+body, .menubar, .dock, .start-menu, .action-center, .context-menu, .window {
   transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
@@ -241,14 +713,26 @@ html[data-anim="off"] *, html[data-anim="off"] *::before, html[data-anim="off"] 
   transition-duration: 0.001s !important;
 }
 
-/* 非玻璃模式：使用不透明面板 */
+
+/* 非玻璃模式：使用不透明面板（data-glass="off" 与新类名 theme-glass 双轨兼容） */
+html[data-glass="off"] .window,
+html[data-glass="off"] .menubar,
+html[data-glass="off"] .start-menu,
+html[data-glass="off"] .action-center,
+html[data-glass="off"] .context-menu,
+html[data-glass="off"] .toast,
 body:not(.theme-glass) .window,
-body:not(.theme-glass) .taskbar,
 body:not(.theme-glass) .start-menu,
 body:not(.theme-glass) .action-center,
 body:not(.theme-glass) .context-menu,
 body:not(.theme-glass) .toast {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  background: var(--surface-solid);
+}
+body:not(.theme-glass) .window,
+body:not(.theme-glass) .start-menu,
+body:not(.theme-glass) .action-center,
+body:not(.theme-glass) .context-menu,
+body:not(.theme-glass) .toast {
+  background: var(--surface);
 }

@@ -11,9 +11,9 @@ html, body {
 body {
   font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB",
     Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
-  font-size: 14px;
+  font-size: var(--fs-14);
   color: var(--text);
-  background: #05070f;
+  background: var(--navy-950);
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
@@ -38,7 +38,7 @@ a { color: inherit; text-decoration: none; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 2px solid transparent;
   background-clip: content-box;
 }

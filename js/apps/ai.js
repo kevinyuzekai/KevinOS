@@ -289,8 +289,8 @@
 
   /* ---------------- 应用 ---------------- */
   K.registerApp({
-    id: 'ai', name: 'AI 助手', icon: 'about',
-    gradient: ['#7c3aed', '#a855f7'], pinned: true, category: '工具',
+    id: 'ai', name: 'AI 助手', icon: 'ai',
+    gradient: ['#6D28D9', '#A78BFA'], pinned: true, category: '工具',
     size: { w: 900, h: 640 },
     mount(win) {
       let settings = loadSettings();

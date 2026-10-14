@@ -21,7 +21,7 @@
 
   K.registerApp({
     id: 'calculator', name: '计算器', icon: 'calculator',
-    gradient: ['#10b981', '#34d399'], pinned: false, category: '工具',
+    gradient: ['#0A7A50', '#34D399'], pinned: false, category: '工具',
     size: { w: 340, h: 500 },
     mount(win) {
       let expr = '';

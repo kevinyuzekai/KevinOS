@@ -19,7 +19,7 @@
 
   K.registerApp({
     id: 'converter', name: '单位换算', icon: 'calculator', installable: true,
-    gradient: ['#8b5cf6', '#a78bfa'], category: '工具',
+    gradient: ['#4338CA', '#7C7CF5'], category: '工具',
     size: { w: 560, h: 480 },
     mount(win) {
       const catSel = el('select', { class: 'conv-sel' });

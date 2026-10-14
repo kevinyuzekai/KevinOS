@@ -94,7 +94,7 @@
   /* ---------- 应用挂载 ---------- */
   K.registerApp({
     id: 'browser', name: 'Kevin 浏览器', icon: 'browser',
-    gradient: ['#4f7cff', '#22d3ee'], pinned: true, category: '网络',
+    gradient: ['#2C5AE0', '#4F7CFF'], pinned: true, category: '网络',
     size: { w: 1020, h: 680 },
     mount(win, args) {
       const tabs = [];

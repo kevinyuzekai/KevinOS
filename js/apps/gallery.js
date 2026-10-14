@@ -9,7 +9,7 @@
 
   K.registerApp({
     id: 'gallery', name: '相册', icon: 'photos', installable: true,
-    gradient: ['#8b5cf6', '#6366f1'], category: '媒体',
+    gradient: ['#6D28D9', '#A78BFA'], category: '媒体',
     size: { w: 780, h: 600 },
     mount(win) {
       const grid = el('div', { class: 'gallery-grid' });

@@ -53,7 +53,7 @@
 
   K.registerApp({
     id: 'files', name: '文件管理器', icon: 'files',
-    gradient: ['#ffb02e', '#ff8a3d'], pinned: true, category: '系统',
+    gradient: ['#0E7490', '#22D3EE'], pinned: true, category: '系统',
     size: { w: 980, h: 640 },
     mount(win, args) {
       const state = {

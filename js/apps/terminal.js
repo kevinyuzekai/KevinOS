@@ -9,7 +9,7 @@
 
   K.registerApp({
     id: 'terminal', name: '终端', icon: 'terminal',
-    gradient: ['#0f172a', '#334155'], pinned: true, category: '系统',
+    gradient: ['#4338CA', '#7C7CF5'], pinned: true, category: '系统',
     size: { w: 760, h: 480 },
     mount(win) {
       let cwd = '/Home';

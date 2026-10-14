@@ -29,7 +29,7 @@
 
   K.registerApp({
     id: 'settings', name: '设置', icon: 'settings',
-    gradient: ['#64748b', '#94a3b8'], pinned: true, category: '系统',
+    gradient: ['#2C5AE0', '#4F7CFF'], pinned: true, category: '系统',
     size: { w: 900, h: 620 },
     mount(win) {
       let current = 'appearance';
@@ -68,7 +68,8 @@
         ]));
 
         const accents = [
-          ['blue', '#4f7cff'], ['violet', '#9b6bff'], ['green', '#10b981'], ['pink', '#ff5c8a'], ['orange', '#ff8a3d']
+          ['blue', '#2C5AE0'], ['indigo', '#4338CA'], ['cyan', '#0E7490'],
+          ['green', '#0A7A50'], ['amber', '#B45309'], ['rose', '#BE123C'], ['violet', '#6D28D9']
         ];
         const accRow = el('div', { class: 'theme-swatches' });
         accents.forEach(([name, color]) => {
@@ -79,6 +80,18 @@
         main.appendChild(el('div', { class: 'set-group' }, [
           el('div', { class: 'set-group-title', text: '强调色' }),
           row('强调色', '影响按钮、选中态与高亮', accRow)
+        ]));
+
+        // 材质三档：自动（浅色磨砂 / 深色极光）/ 强制磨砂 / 强制极光
+        const mat = st.material || 'auto';
+        const matCtrl = el('div', { class: 'theme-swatches' }, [
+          swatchBtn('自动', mat === 'auto', '#4F7CFF', () => { K.system.setMaterial('auto'); render(); }),
+          swatchBtn('磨砂', mat === 'frost', '#2C5AE0', () => { K.system.setMaterial('frost'); render(); }),
+          swatchBtn('极光', mat === 'aurora', '#6D28D9', () => { K.system.setMaterial('aurora'); render(); })
+        ]);
+        main.appendChild(el('div', { class: 'set-group' }, [
+          el('div', { class: 'set-group-title', text: '材质' }),
+          row('材质', '自动：浅色磨砂、深色极光；也可手动强制', matCtrl)
         ]));
 
         const wallGrid = el('div', { class: 'wall-grid' });

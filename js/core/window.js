@@ -62,7 +62,7 @@
 
     const icoEl = K.apps.appIconEl(app);
     icoEl.className = 'app-ico sm';
-    icoEl.style.borderRadius = '7px';
+    // 尺寸/圆角交给 CSS（.win-titlebar .app-ico.sm 统一 --size-titlebar-icon + --radius-xs）
 
     const titlebar = el('div', { class: 'win-titlebar' }, [
       el('div', { class: 'win-traffic' }, [
@@ -71,8 +71,8 @@
         app.resizable === false ? null : makeTraffic('maximize', '缩放', 'M7 7h10v2H9v8H7V7z')
       ].filter(Boolean)),
       icoEl,
-      el('div', { class: 'win-title', text: app.name }),
-      el('div', { class: 'win-controls' }, [])
+      el('div', { class: 'win-title', text: app.name })
+      // 右侧 .win-controls 已按规范删除（修 P4：同一窗口只保留左侧一套交通灯）
     ]);
     const body = el('div', { class: 'win-body' });
     winEl.append(titlebar, body);
