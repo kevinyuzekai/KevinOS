@@ -11,7 +11,7 @@
   function save(list) { localStorage.setItem(STORE_KEY, JSON.stringify(list)); }
 
   K.registerApp({
-    id: 'todo', name: '待办', icon: 'notes', installable: true,
+    id: 'todo', name: '待办', icon: 'todo', installable: true,
     gradient: ['#0A7A50', '#34D399'], category: '效率',
     size: { w: 560, h: 640 },
     mount(win) {

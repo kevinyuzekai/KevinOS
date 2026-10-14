@@ -25,7 +25,7 @@
   }
 
   K.registerApp({
-    id: 'passwords', name: '密码管理', icon: 'settings', installable: true,
+    id: 'passwords', name: '密码管理', icon: 'passwords', installable: true,
     gradient: ['#9A3412', '#F97316'], category: '安全',
     size: { w: 720, h: 560 },
     mount(win) {

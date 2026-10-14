@@ -8,7 +8,7 @@
   const FS = K.FS;
 
   K.registerApp({
-    id: 'gallery', name: '相册', icon: 'photos', installable: true,
+    id: 'gallery', name: '相册', icon: 'gallery', installable: true,
     gradient: ['#6D28D9', '#A78BFA'], category: '媒体',
     size: { w: 780, h: 600 },
     mount(win) {

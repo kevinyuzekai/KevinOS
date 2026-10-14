@@ -63,6 +63,8 @@
 /* 计算器/时钟/图片查看器的多子路径 glyph 会被 nonzero 填满成白方块（验收 A10） */
 .app-ico svg path { fill-rule: evenodd; }
 .app-ico.sm { width: 30px; height: 30px; border-radius: var(--radius-xs); }
+/* 文件管理器行内图标（S3）：42px ≥ 32px，圆角按图标规则走 22% */
+.app-ico.fm { width: var(--size-fm-icon); height: var(--size-fm-icon); border-radius: 22%; }
 .app-ico.lg { width: 56px; height: 56px; border-radius: 22%; }
 
 .clock-time { font-size: var(--fs-13); font-weight: 600; }

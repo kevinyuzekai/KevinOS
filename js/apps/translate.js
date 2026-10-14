@@ -15,7 +15,7 @@
   ];
 
   K.registerApp({
-    id: 'translate', name: '翻译', icon: 'about', installable: true,
+    id: 'translate', name: '翻译', icon: 'translate', installable: true,
     gradient: ['#0E7490', '#22D3EE'], category: '工具',
     size: { w: 680, h: 520 },
     mount(win) {

@@ -53,8 +53,8 @@
   }
 
   K.registerApp({
-    id: 'archive', name: '压缩解压', icon: 'files', installable: true,
-    gradient: ['#2C5AE0', '#4F7CFF'], category: '工具',
+    id: 'archive', name: '压缩解压', icon: 'archive', installable: true,
+    gradient: ['#9A3412', '#F97316'], category: '工具',
     size: { w: 640, h: 560 },
     mount(win) {
       const input = el('textarea', { class: 'arc-input', placeholder: '输入要压缩的文本…', rows: '10' });

@@ -7,7 +7,7 @@
   const { el } = K.util;
 
   K.registerApp({
-    id: 'clock', name: '时钟', icon: 'calendar',
+    id: 'clock', name: '时钟', icon: 'clock',
     gradient: ['#2C5AE0', '#4F7CFF'], category: '工具',
     size: { w: 480, h: 560 },
     mount(win) {

@@ -7,7 +7,7 @@
   const { el } = K.util;
 
   K.registerApp({
-    id: 'recorder', name: '录屏', icon: 'media', installable: true,
+    id: 'recorder', name: '录屏', icon: 'recorder', installable: true,
     gradient: ['#BE123C', '#FB7185'], category: '媒体',
     size: { w: 640, h: 520 },
     mount(win) {

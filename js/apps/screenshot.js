@@ -7,7 +7,7 @@
   const { el } = K.util;
 
   K.registerApp({
-    id: 'screenshot', name: '截图', icon: 'photos', installable: true,
+    id: 'screenshot', name: '截图', icon: 'screenshot', installable: true,
     gradient: ['#BE123C', '#FB7185'], category: '工具',
     size: { w: 600, h: 520 },
     mount(win) {

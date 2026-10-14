@@ -67,15 +67,6 @@
 .fm-usage::after { content: ""; display: block; height: 100%; width: 18%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: var(--radius-xs); }
 .ctx-item.disabled { opacity: .45; pointer-events: none; }
 
-/* 图标配色 */
-.ic-folder { fill: #FFC24B; }
-.ic-file   { fill: #8ea3c9; }
-.ic-img    { fill: #46b1ff; }
-.ic-txt    { fill: var(--canvas-fg-dim); }
-.ic-doc    { fill: #2C5AE0; }
-.ic-audio  { fill: #b06bff; }
-.ic-code   { fill: #35c98b; }
-
 /* ============ 浏览器 ============ */
 .br-tabs { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2) var(--space-3) 0; background: var(--surface-2); overflow-x: auto; }
 .br-tab {
