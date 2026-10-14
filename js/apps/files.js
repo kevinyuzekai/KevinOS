@@ -31,7 +31,7 @@
         audio: ['media', '#9b6bff', '#d38fff'],
         code: ['code', '#10b981', '#34d399'],
         text: ['editor', '#64748b', '#94a3b8'],
-        doc: ['editor', '#4f7cff', '#7aa2ff'],
+        doc: ['office', '#4f7cff', '#7aa2ff'],
         file: ['about', '#64748b', '#94a3b8']
       };
       const [ic, c1, c2] = map[kind] || map.file;
@@ -48,6 +48,7 @@
     if (kind === 'image') K.WM.open('photos', { path });
     else if (kind === 'audio') K.WM.open('media', { path });
     else if (kind === 'code') K.WM.open('code', { path });
+    else if (kind === 'doc') K.WM.open('office', { path });
     else K.WM.open('editor', { path });
   }
 

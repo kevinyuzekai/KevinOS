@@ -22,6 +22,423 @@
   function colIndex(name) { let n = 0; for (const ch of name.toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64); return n - 1; }
   function uid(t) { return t + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function rgba(hex, a) { const h = hex.replace('#', ''); const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16); return `rgba(${r},${g},${b},${a})`; }
+  function xesc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'); }
+
+  /* ============================================================
+   * OOXML 支持：ZIP 打包（CRC-32 + store）、DOCX / XLSX / PPTX 生成
+   * 生成的文档为真正的 Office Open XML，可被 WPS / Office 365 直接打开
+   * ============================================================ */
+  const CRC_TABLE = (function () {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; }
+    return t;
+  })();
+  function crc32(bytes) { let c = 0xFFFFFFFF; for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function strToBytes(s) {
+    const bytes = [];
+    for (let i = 0; i < s.length; i++) {
+      const code = s.charCodeAt(i);
+      if (code < 0x80) bytes.push(code);
+      else if (code < 0x800) { bytes.push(0xC0 | (code >> 6)); bytes.push(0x80 | (code & 0x3F)); }
+      else { bytes.push(0xE0 | (code >> 12)); bytes.push(0x80 | ((code >> 6) & 0x3F)); bytes.push(0x80 | (code & 0x3F)); }
+    }
+    return new Uint8Array(bytes);
+  }
+  function zipStore(files) {
+    // files: [{name, content}] -> Uint8Array（使用 store 方式，不压缩）
+    const localParts = [], centralParts = [];
+    let offset = 0, centralSize = 0;
+    files.forEach(f => {
+      const nameBytes = strToBytes(f.name);
+      const dataBytes = strToBytes(f.content);
+      const crc = crc32(dataBytes);
+      const size = dataBytes.length;
+      const lh = new Uint8Array(30 + nameBytes.length);
+      const dv = new DataView(lh.buffer);
+      dv.setUint32(0, 0x04034b50, true); dv.setUint16(4, 20, true); dv.setUint16(6, 0, true);
+      dv.setUint16(8, 0, true); dv.setUint16(10, 0, true); dv.setUint16(12, 0, true);
+      dv.setUint32(14, crc, true); dv.setUint32(18, size, true); dv.setUint32(22, size, true);
+      dv.setUint16(26, nameBytes.length, true); dv.setUint16(28, 0, true);
+      lh.set(nameBytes, 30);
+      localParts.push(lh, dataBytes);
+      const ch = new Uint8Array(46 + nameBytes.length);
+      const cdv = new DataView(ch.buffer);
+      cdv.setUint32(0, 0x02014b50, true); cdv.setUint16(4, 20, true); cdv.setUint16(6, 20, true);
+      cdv.setUint16(8, 0, true); cdv.setUint16(10, 0, true); cdv.setUint16(12, 0, true); cdv.setUint16(14, 0, true);
+      cdv.setUint32(16, crc, true); cdv.setUint32(20, size, true); cdv.setUint32(24, size, true);
+      cdv.setUint16(28, nameBytes.length, true); cdv.setUint16(30, 0, true); cdv.setUint16(32, 0, true);
+      cdv.setUint16(34, 0, true); cdv.setUint16(36, 0, true); cdv.setUint32(38, 0, true); cdv.setUint32(42, offset, true);
+      ch.set(nameBytes, 46);
+      centralParts.push(ch);
+      centralSize += ch.length;
+      offset += lh.length + dataBytes.length;
+    });
+    const eocd = new Uint8Array(22);
+    const edv = new DataView(eocd.buffer);
+    edv.setUint32(0, 0x06054b50, true); edv.setUint16(4, 0, true); edv.setUint16(6, 0, true);
+    edv.setUint16(8, files.length, true); edv.setUint16(10, files.length, true);
+    edv.setUint32(12, centralSize, true); edv.setUint32(16, offset, true); edv.setUint16(20, 0, true);
+    const total = offset + centralSize + eocd.length;
+    const out = new Uint8Array(total);
+    let pos = 0;
+    localParts.forEach(p => { out.set(p, pos); pos += p.length; });
+    centralParts.forEach(p => { out.set(p, pos); pos += p.length; });
+    out.set(eocd, pos);
+    return out;
+  }
+  const XMLDECL = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+  /* ---------------- DOCX（WordprocessingML） ---------------- */
+  function wmlRun(text, o) {
+    let rpr = '';
+    if (o && o.b) rpr += '<w:b/><w:bCs/>';
+    if (o && o.i) rpr += '<w:i/><w:iCs/>';
+    if (o && o.u) rpr += '<w:u w:val="single"/>';
+    return '<w:r>' + (rpr ? '<w:rPr>' + rpr + '</w:rPr>' : '') + '<w:t xml:space="preserve">' + xesc(text) + '</w:t></w:r>';
+  }
+  function wmlInline(node, o) {
+    o = o || {};
+    let s = '';
+    Array.prototype.forEach.call(node.childNodes, child => {
+      if (child.nodeType === 3) { if (child.textContent) s += wmlRun(child.textContent, o); return; }
+      if (child.nodeType !== 1) return;
+      const tag = child.tagName.toLowerCase();
+      if (tag === 'br') { s += '<w:r><w:br/></w:r>'; return; }
+      if (tag === 'b' || tag === 'strong') { s += wmlInline(child, { b: true, i: o.i, u: o.u }); return; }
+      if (tag === 'i' || tag === 'em') { s += wmlInline(child, { b: o.b, i: true, u: o.u }); return; }
+      if (tag === 'u') { s += wmlInline(child, { b: o.b, i: o.i, u: true }); return; }
+      if (tag === 'img') return;
+      s += wmlInline(child, o);
+    });
+    return s;
+  }
+  function htmlToWmlBody(html) {
+    let root;
+    try { const dom = new DOMParser().parseFromString('<div id="__kw">' + (html || '') + '</div>', 'text/html'); root = dom.getElementById('__kw'); }
+    catch (e) { root = null; }
+    if (!root) return '<w:p>' + wmlRun(String(html || '').replace(/<[^>]+>/g, ''), {}) + '</w:p>';
+    let out = '';
+    Array.prototype.forEach.call(root.childNodes, node => {
+      if (node.nodeType === 3) { if (node.textContent && node.textContent.trim()) out += '<w:p>' + wmlRun(node.textContent, {}) + '</w:p>'; return; }
+      if (node.nodeType !== 1) return;
+      const tag = node.tagName.toLowerCase();
+      if (/^h[1-6]$/.test(tag)) {
+        const n = Math.min(parseInt(tag[1], 10), 3);
+        out += '<w:p><w:pPr><w:pStyle w:val="Heading' + n + '"/></w:pPr>' + wmlInline(node, { b: true }) + '</w:p>';
+        return;
+      }
+      if (tag === 'ul' || tag === 'ol') {
+        let i = 1;
+        Array.prototype.forEach.call(node.children, li => {
+          const prefix = tag === 'ol' ? (i++) + '. ' : '• ';
+          out += '<w:p><w:pPr><w:ind w:left="360" w:hanging="360"/></w:pPr>' + wmlRun(prefix, {}) + wmlInline(li, {}) + '</w:p>';
+        });
+        return;
+      }
+      if (tag === 'blockquote') { out += '<w:p><w:pPr><w:ind w:left="720"/><w:pStyle w:val="Normal"/></w:pPr>' + wmlInline(node, { i: true }) + '</w:p>'; return; }
+      if (tag === 'table') {
+        let trs = '';
+        Array.prototype.forEach.call(node.querySelectorAll('tr'), tr => {
+          let tcs = '';
+          Array.prototype.forEach.call(tr.children, cell => {
+            tcs += '<w:tc><w:tcPr><w:tcW w:w="2400" w:type="dxa"/></w:tcPr><w:p>' + wmlInline(cell, {}) + '</w:p></w:tc>';
+          });
+          trs += '<w:tr>' + tcs + '</w:tr>';
+        });
+        const bd = '<w:top w:val="single" w:sz="4" w:space="0" w:color="BBBBBB"/><w:left w:val="single" w:sz="4" w:space="0" w:color="BBBBBB"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="BBBBBB"/><w:right w:val="single" w:sz="4" w:space="0" w:color="BBBBBB"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="BBBBBB"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="BBBBBB"/>';
+        out += '<w:tbl><w:tblPr><w:tblBorders>' + bd + '</w:tblBorders></w:tblPr>' + trs + '</w:tbl><w:p/>';
+        return;
+      }
+      out += '<w:p>' + wmlInline(node, {}) + '</w:p>';
+    });
+    return out || '<w:p/>';
+  }
+  function buildDOCX(html) {
+    const body = htmlToWmlBody(html);
+    const files = [];
+    files.push({ name: '[Content_Types].xml', content: XMLDECL +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+      '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
+      '</Types>' });
+    files.push({ name: '_rels/.rels', content: XMLDECL +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+      '</Relationships>' });
+    files.push({ name: 'word/document.xml', content: XMLDECL +
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+      '<w:body>' + body +
+      '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr>' +
+      '</w:body></w:document>' });
+    files.push({ name: 'word/_rels/document.xml.rels', content: XMLDECL +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+      '</Relationships>' });
+    files.push({ name: 'word/styles.xml', content: XMLDECL +
+      '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+      '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:eastAsia="宋体" w:hAnsi="Calibri"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:rPrDefault><w:pPrDefault/></w:docDefaults>' +
+      '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:rPr><w:b/><w:sz w:val="48"/><w:szCs w:val="48"/></w:rPr></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:rPr><w:b/><w:sz w:val="36"/><w:szCs w:val="36"/></w:rPr></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:rPr><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr></w:style>' +
+      '</w:styles>' });
+    return zipStore(files);
+  }
+
+  /* ---------------- XLSX（SpreadsheetML） ---------------- */
+  function buildXLSX(sheet) {
+    const rows = [];
+    for (let r = 1; r <= sheet.rows; r++) {
+      let cells = '';
+      for (let c = 0; c < sheet.cols; c++) {
+        const cell = sheet.cells[colName(c) + r];
+        if (!cell || cell.v == null || cell.v === '') continue;
+        const ref = colName(c) + r;
+        if (typeof cell.v === 'number') cells += '<c r="' + ref + '"><v>' + cell.v + '</v></c>';
+        else {
+          const n = parseFloat(cell.v);
+          if (!isNaN(n) && String(n) === String(cell.v).trim()) cells += '<c r="' + ref + '"><v>' + n + '</v></c>';
+          else cells += '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + xesc(cell.v) + '</t></is></c>';
+        }
+      }
+      if (cells) rows.push('<row r="' + r + '">' + cells + '</row>');
+    }
+    const lastCol = colName(Math.max(0, sheet.cols - 1));
+    const files = [];
+    files.push({ name: '[Content_Types].xml', content: XMLDECL +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      '</Types>' });
+    files.push({ name: '_rels/.rels', content: XMLDECL +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+      '</Relationships>' });
+    files.push({ name: 'xl/workbook.xml', content: XMLDECL +
+      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+      '<sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets>' +
+      '</workbook>' });
+    files.push({ name: 'xl/_rels/workbook.xml.rels', content: XMLDECL +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+      '</Relationships>' });
+    files.push({ name: 'xl/worksheets/sheet1.xml', content: XMLDECL +
+      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+      '<dimension ref="A1:' + lastCol + Math.max(1, sheet.rows) + '"/>' +
+      '<sheetViews><sheetView workbookViewId="0"/></sheetViews>' +
+      '<sheetFormatPr defaultRowHeight="15"/>' +
+      '<sheetData>' + rows.join('') + '</sheetData>' +
+      '</worksheet>' });
+    files.push({ name: 'xl/styles.xml', content: XMLDECL +
+      '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>' +
+      '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>' +
+      '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+      '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+      '<cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs>' +
+      '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+      '</styleSheet>' });
+    return zipStore(files);
+  }
+
+  /* ---------------- PPTX（PresentationML） ---------------- */
+  function buildPPTX(data) {
+    const slides = (data && data.slides && data.slides.length) ? data.slides : [{ title: '演示文稿', body: '', bg: '#1b2a4a', fg: '#ffffff' }];
+    const files = [];
+    let ct = XMLDECL + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>' +
+      '<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>' +
+      '<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>' +
+      '<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>';
+    slides.forEach((_, i) => { ct += '<Override PartName="/ppt/slides/slide' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>'; });
+    ct += '</Types>';
+    files.push({ name: '[Content_Types].xml', content: ct });
+    files.push({ name: '_rels/.rels', content: XMLDECL +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>' +
+      '</Relationships>' });
+    let pres = XMLDECL + '<p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">' +
+      '<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst><p:sldIdLst>';
+    slides.forEach((_, i) => { pres += '<p:sldId id="' + (256 + i) + '" r:id="rId' + (i + 2) + '"/>'; });
+    pres += '</p:sldIdLst><p:sldSz cx="9144000" cy="6858000" type="screen4x3"/><p:notesSz cx="6858000" cy="9144000"/><p:defaultTextStyle/></p:presentation>';
+    files.push({ name: 'ppt/presentation.xml', content: pres });
+    let pr = XMLDECL + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>';
+    slides.forEach((_, i) => { pr += '<Relationship Id="rId' + (i + 2) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide' + (i + 1) + '.xml"/>'; });
+    pr += '</Relationships>';
+    files.push({ name: 'ppt/_rels/presentation.xml.rels', content: pr });
+    files.push({ name: 'ppt/theme/theme1.xml', content: XMLDECL +
+      '<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office Theme"><a:themeElements>' +
+      '<a:clrScheme name="Office"><a:dk1><a:srgbClr val="000000"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="1B2A4A"/></a:dk2><a:lt2><a:srgbClr val="E8ECF4"/></a:lt2><a:accent1><a:srgbClr val="2B6CFF"/></a:accent1><a:accent2><a:srgbClr val="E2483D"/></a:accent2><a:accent3><a:srgbClr val="109D58"/></a:accent3><a:accent4><a:srgbClr val="F5732C"/></a:accent4><a:accent5><a:srgbClr val="8A4BFF"/></a:accent5><a:accent6><a:srgbClr val="00A6CB"/></a:accent6><a:hlink><a:srgbClr val="0563C1"/></a:hlink><a:folHlink><a:srgbClr val="954F72"/></a:folHlink></a:clrScheme>' +
+      '<a:fontScheme name="Office"><a:majorFont><a:latin typeface="Calibri Light"/><a:ea typeface="宋体"/><a:cs typeface="Calibri Light"/></a:majorFont><a:minorFont><a:latin typeface="Calibri"/><a:ea typeface="宋体"/><a:cs typeface="Calibri"/></a:minorFont></a:fontScheme>' +
+      '<a:fmtScheme name="Office"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:fillStyleLst><a:lnStyleLst><a:ln w="9525"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme>' +
+      '</a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>' });
+    files.push({ name: 'ppt/slideMasters/slideMaster1.xml', content: XMLDECL +
+      '<p:sldMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">' +
+      '<p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/></p:spTree></p:cSld>' +
+      '<p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>' +
+      '<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst>' +
+      '<p:txStyles><p:titleStyle/><p:bodyStyle/><p:otherStyle/></p:txStyles></p:sldMaster>' });
+    files.push({ name: 'ppt/slideMasters/_rels/slideMaster1.xml.rels', content: XMLDECL +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>' +
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/>' +
+      '</Relationships>' });
+    files.push({ name: 'ppt/slideLayouts/slideLayout1.xml', content: XMLDECL +
+      '<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="title">' +
+      '<p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/></p:spTree></p:cSld>' +
+      '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>' });
+    files.push({ name: 'ppt/slideLayouts/_rels/slideLayout1.xml.rels', content: XMLDECL +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/>' +
+      '</Relationships>' });
+    slides.forEach((s, i) => {
+      const bgHex = (s.bg || '#1b2a4a').replace('#', '').toUpperCase();
+      const fgHex = (s.fg || '#ffffff').replace('#', '').toUpperCase();
+      const title = xesc(s.title || '');
+      const bodyText = String(s.body || '');
+      let slide = XMLDECL + '<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld>' +
+        '<p:bg><p:bgPr><a:solidFill><a:srgbClr val="' + bgHex + '"/></a:solidFill></p:bgPr></p:bg><p:spTree>' +
+        '<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/>' +
+        '<p:sp><p:nvSpPr><p:cNvPr id="2" name="Title"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr>' +
+        '<p:spPr><a:xfrm><a:off x="457200" y="457200"/><a:ext cx="8229600" cy="1143000"/></a:xfrm></p:spPr>' +
+        '<p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="zh-CN" sz="4000" b="1"><a:solidFill><a:srgbClr val="' + fgHex + '"/></a:solidFill><a:latin typeface="Calibri Light"/><a:ea typeface="宋体"/></a:rPr><a:t>' + title + '</a:t></a:r></a:p></p:txBody></p:sp>';
+      let bodyParas = '';
+      bodyText.split('\n').forEach(line => { bodyParas += '<a:p><a:r><a:rPr lang="zh-CN" sz="2400"><a:solidFill><a:srgbClr val="' + fgHex + '"/></a:solidFill><a:latin typeface="Calibri"/><a:ea typeface="宋体"/></a:rPr><a:t>' + xesc(line) + '</a:t></a:r></a:p>'; });
+      slide += '<p:sp><p:nvSpPr><p:cNvPr id="3" name="Body"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>' +
+        '<p:spPr><a:xfrm><a:off x="457200" y="1828800"/><a:ext cx="8229600" cy="4114800"/></a:xfrm></p:spPr>' +
+        '<p:txBody><a:bodyPr wrap="square" anchor="t"/><a:lstStyle/>' + bodyParas + '</p:txBody></p:sp>' +
+        '</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>';
+      files.push({ name: 'ppt/slides/slide' + (i + 1) + '.xml', content: slide });
+      files.push({ name: 'ppt/slides/_rels/slide' + (i + 1) + '.xml.rels', content: XMLDECL +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>' +
+        '</Relationships>' });
+    });
+    return zipStore(files);
+  }
+
+  /* ---------------- OOXML 读取（解包 ZIP，用于回读保存的文件） ---------------- */
+  function inflateRaw(bytes) {
+    return new Promise((resolve, reject) => {
+      try {
+        const ds = new DecompressionStream('deflate-raw');
+        const stream = new Blob([bytes]).stream().pipeThrough(ds);
+        new Response(stream).arrayBuffer().then(buf => resolve(new Uint8Array(buf))).catch(reject);
+      } catch (e) { reject(e); }
+    });
+  }
+  async function unzip(bytes) {
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let eocd = -1;
+    for (let i = bytes.length - 22; i >= 0; i--) { if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+    if (eocd < 0) throw new Error('不是有效的 ZIP/OOXML 文件');
+    const cdOffset = dv.getUint32(eocd + 16, true);
+    const total = dv.getUint16(eocd + 10, true);
+    const out = {};
+    let pos = cdOffset;
+    for (let n = 0; n < total; n++) {
+      if (dv.getUint32(pos, true) !== 0x02014b50) break;
+      const compMethod = dv.getUint16(pos + 10, true);
+      const compSize = dv.getUint32(pos + 20, true);
+      const nameLen = dv.getUint16(pos + 28, true);
+      const extraLen = dv.getUint16(pos + 30, true);
+      const commentLen = dv.getUint16(pos + 32, true);
+      const localOffset = dv.getUint32(pos + 42, true);
+      let name = '';
+      for (let k = 0; k < nameLen; k++) name += String.fromCharCode(bytes[pos + 46 + k]);
+      pos += 46 + nameLen + extraLen + commentLen;
+      const lnNameLen = dv.getUint16(localOffset + 26, true);
+      const lnExtraLen = dv.getUint16(localOffset + 28, true);
+      const dataStart = localOffset + 30 + lnNameLen + lnExtraLen;
+      let data = bytes.subarray(dataStart, dataStart + compSize);
+      if (compMethod === 8) { try { data = await inflateRaw(data); } catch (e) { continue; } }
+      out[name] = new TextDecoder('utf-8').decode(data);
+    }
+    return out;
+  }
+  async function parseDOCX(bytes) {
+    const z = await unzip(bytes);
+    const xml = z['word/document.xml'] || '';
+    const paras = xml.match(/<w:p\b[\s\S]*?<\/w:p>/g) || [];
+    let html = '';
+    paras.forEach(p => {
+      const style = (p.match(/<w:pStyle[^>]*w:val="([^"]+)"/) || [])[1] || '';
+      const texts = (p.match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g) || []).map(t => t.replace(/<[^>]+>/g, ''));
+      const text = texts.join('').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+      if (!text.trim()) return;
+      const m = /^Heading(\d)/.exec(style);
+      if (m) { const lvl = Math.min(parseInt(m[1], 10), 3); html += '<h' + lvl + '>' + xesc(text) + '</h' + lvl + '>'; }
+      else html += '<p>' + xesc(text) + '</p>';
+    });
+    return html || '<p></p>';
+  }
+  async function parseXLSX(bytes) {
+    const z = await unzip(bytes);
+    const xml = z['xl/worksheets/sheet1.xml'] || '';
+    const sheet = { cols: 12, rows: 30, cells: {} };
+    const rowMatches = xml.match(/<row\b[\s\S]*?<\/row>/g) || [];
+    let maxC = 0, maxR = 0;
+    rowMatches.forEach(rowXml => {
+      const rNum = parseInt((rowXml.match(/<row[^>]*\br="(\d+)"/) || [])[1] || '0', 10);
+      const cells = rowXml.match(/<c\b[\s\S]*?<\/c>|<c\b[^>]*\/>/g) || [];
+      cells.forEach(c => {
+        const ref = (c.match(/r="([A-Z]+\d+)"/) || [])[1]; if (!ref) return;
+        const col = colIndex(ref.replace(/\d+/g, ''));
+        const row = parseInt(ref.replace(/[A-Z]+/g, ''), 10);
+        let value = '';
+        const vm = c.match(/<v>([\s\S]*?)<\/v>/);
+        const im = c.match(/<is>[\s\S]*?<t[^>]*>([\s\S]*?)<\/t>[\s\S]*?<\/is>/);
+        if (im) value = im[1];
+        else if (vm) value = vm[1];
+        if (value === '') return;
+        value = value.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+        const n = parseFloat(value);
+        const cell = (!isNaN(n) && String(n) === value.trim()) ? { raw: value, v: n } : { raw: value, v: value };
+        sheet.cells[colName(col) + row] = cell;
+        if (col > maxC) maxC = col; if (row > maxR) maxR = row;
+      });
+    });
+    sheet.cols = Math.max(12, maxC + 2); sheet.rows = Math.max(30, maxR + 2);
+    return sheet;
+  }
+  async function parsePPTX(bytes) {
+    const z = await unzip(bytes);
+    const names = Object.keys(z).filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a, b) => parseInt(a.match(/\d+/)) - parseInt(b.match(/\d+/)));
+    const data = { index: 0, slides: [] };
+    names.forEach(n => {
+      const xml = z[n];
+      const bgM = xml.match(/<a:srgbClr val="([0-9A-Fa-f]{6})"\/>/);
+      let bg = bgM ? '#' + bgM[1] : '#1b2a4a', fg = '#ffffff';
+      const sps = xml.match(/<p:sp>[\s\S]*?<\/p:sp>/g) || [];
+      let title = '', body = '';
+      sps.forEach(sp => {
+        const texts = (sp.match(/<a:t>([\s\S]*?)<\/a:t>/g) || []).map(t => t.replace(/<\/?a:t>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"'));
+        const cm = sp.match(/<a:solidFill><a:srgbClr val="([0-9A-Fa-f]{6})"/);
+        const color = cm ? '#' + cm[1] : '#ffffff';
+        if (/type="title"/.test(sp)) { title = texts.join(''); fg = color; }
+        else if (texts.length) body += (body ? '\n' : '') + texts.join('\n');
+      });
+      data.slides.push({ title, body, bg, fg });
+    });
+    if (!data.slides.length) data.slides.push({ title: '新演示文稿', body: '', bg: '#1b2a4a', fg: '#ffffff' });
+    return data;
+  }
+  // 按文档类型构建二进制 OOXML，返回 { bytes, ext, mime }
+  function buildBinary(d) {
+    if (d.type === 'doc') return { bytes: buildDOCX(d.data), ext: 'docx', mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
+    if (d.type === 'sheet') return { bytes: buildXLSX(d.data), ext: 'xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+    if (d.type === 'slide') return { bytes: buildPPTX(d.data), ext: 'pptx', mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
+    return null;
+  }
 
   /* ---------------- 表格公式引擎 ---------------- */
   function numOf(sheet, ref) {
@@ -128,49 +545,27 @@
         win.setTitle('KOffice' + (d ? ' — ' + d.name + (d.dirty ? ' •' : '') : ''));
       }
 
-      /* ---------- 保存 / 导出 ---------- */
+      /* ---------- 保存 / 导出（生成真正的 .docx / .xlsx / .pptx） ---------- */
       async function saveDoc() {
         const d = activeDoc(); if (!d) return;
         syncActive();
         if (d.type === 'pdf') { K.WM.UI.alert('PDF 为只读查看，无需保存。'); return; }
-        const extMap = { doc: 'html', sheet: 'csv', slide: 'json' };
-        const def = d.name.replace(/\.[^.]+$/, '') + '.' + extMap[d.type];
+        const built = buildBinary(d);
+        const def = d.name.replace(/\.[^.]+$/, '') + '.' + built.ext;
         const name = await K.WM.UI.prompt('保存到「文档」文件夹，文件名：', def, '保存');
         if (!name) return;
-        const content = serialize(d);
+        const content = FS.dataUrlFromBytes(built.bytes, built.mime);
         const r = FS.writeFile('/Home/Documents/' + name, content);
         if (!r.ok) { K.WM.UI.alert(r.error || '保存失败'); return; }
         d.name = name.replace(/\.[^.]+$/, ''); d.dirty = false;
         renderTabs(); updateTitle();
-        K.desktop.notify({ title: 'KOffice', body: '已保存：' + name, icon: 'office' });
+        K.desktop.notify({ title: 'KOffice', body: '已保存：' + name + '（可用 WPS / Office 打开）', icon: 'office' });
       }
       function exportDoc() {
         const d = activeDoc(); if (!d) return; syncActive();
         if (d.type === 'pdf') { if (d.data.url) window.open(d.data.url, '_blank'); return; }
-        const mime = { doc: 'text/html', sheet: 'text/csv', slide: 'application/json' }[d.type];
-        const ext = { doc: 'html', sheet: 'csv', slide: 'json' }[d.type];
-        download(d.name.replace(/\.[^.]+$/, '') + '.' + ext, serialize(d), mime + ';charset=utf-8');
-      }
-      function serialize(d) {
-        if (d.type === 'doc') return '<!DOCTYPE html><meta charset="utf-8"><title>' + d.name + '</title>\n' + d.data;
-        if (d.type === 'sheet') return sheetToCSV(d.data);
-        if (d.type === 'slide') return JSON.stringify(d.data, null, 2);
-        return '';
-      }
-      function sheetToCSV(sheet) {
-        const rows = [];
-        for (let r = 1; r <= sheet.rows; r++) {
-          const cells = [];
-          for (let c = 0; c < sheet.cols; c++) {
-            const cell = sheet.cells[colName(c) + r];
-            let v = cell ? (typeof cell.v === 'number' ? cell.v : (cell.v || '')) : '';
-            v = String(v);
-            if (/[",\n]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
-            cells.push(v);
-          }
-          rows.push(cells.join(','));
-        }
-        return rows.join('\n');
+        const built = buildBinary(d);
+        download(d.name.replace(/\.[^.]+$/, '') + '.' + built.ext, built.bytes, built.mime);
       }
       function csvToSheet(text) {
         const lines = text.replace(/\r/g, '').split('\n').filter(l => l.length);
@@ -190,17 +585,33 @@
       /* ---------- 从文件系统打开 ---------- */
       function openFromPath(path) {
         const name = path.split('/').pop();
+        const base = name.replace(/\.[^.]+$/, '');
         const ext = (name.split('.').pop() || '').toLowerCase();
         const content = FS.readFile(path) || '';
         if (ext === 'pdf') {
-          if (/^data:application\/pdf/.test(content)) return newDoc('pdf', { url: content, name }, name);
-          return newDoc('pdf', { url: '', name }, name);
+          if (/^data:application\/pdf/.test(content)) return newDoc('pdf', { url: content, name: base }, base);
+          return newDoc('pdf', { url: '', name: base }, base);
         }
-        if (ext === 'csv' || ext === 'tsv') return newDoc('sheet', csvToSheet(content), name.replace(/\.[^.]+$/, ''));
-        if (ext === 'json') { try { const data = JSON.parse(content); if (data.slides) return newDoc('slide', data, name.replace(/\.[^.]+$/, '')); } catch (e) { } }
-        // html / txt / md 等按文字处理
+        // 真正的 Office 二进制文档（以 base64 Data URL 存储）
+        if (ext === 'docx' || ext === 'xlsx' || ext === 'pptx') {
+          const bin = FS.isDataUrl(content) ? FS.bytesFromDataUrl(content).bytes : strToBytes(content);
+          openBinary(new Uint8Array(bin), ext, base);
+          return;
+        }
+        // 兼容旧的 HTML / CSV / JSON 文本格式
+        if (ext === 'csv' || ext === 'tsv') return newDoc('sheet', csvToSheet(content), base);
+        if (ext === 'json') { try { const data = JSON.parse(content); if (data.slides) return newDoc('slide', data, base); } catch (e) { } }
         const html = ext === 'html' ? content : '<pre style="white-space:pre-wrap;font-family:inherit">' + content.replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])) + '</pre>';
-        return newDoc('doc', html, name.replace(/\.[^.]+$/, ''));
+        return newDoc('doc', html, base);
+      }
+      async function openBinary(bytes, ext, base) {
+        try {
+          if (ext === 'pptx') return newDoc('slide', await parsePPTX(bytes), base);
+          if (ext === 'xlsx') return newDoc('sheet', await parseXLSX(bytes), base);
+          if (ext === 'docx') return newDoc('doc', await parseDOCX(bytes), base);
+        } catch (e) {
+          K.WM.UI.alert('无法打开该 Office 文件：' + (e && e.message ? e.message : e));
+        }
       }
 
       /* ---------- 菜单栏 ---------- */

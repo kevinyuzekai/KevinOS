@@ -271,6 +271,36 @@
 
   function reset() { root = defaultTree(); emit(); }
 
+  /* ---- 二进制 / Data URL 工具（用于存储 Office 二进制文档） ---- */
+  function bytesToBase64(bytes) {
+    let bin = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(bin);
+  }
+  function base64ToBytes(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function dataUrlFromBytes(bytes, mime) {
+    return 'data:' + (mime || 'application/octet-stream') + ';base64,' + bytesToBase64(bytes);
+  }
+  function bytesFromDataUrl(str) {
+    const m = /^data:([^;,]*)(;base64)?,([\s\S]*)$/.exec(str || '');
+    if (!m) return null;
+    if (m[2]) return { mime: m[1] || 'application/octet-stream', bytes: base64ToBytes(m[3]) };
+    // 非 base64，按 URL 编码解码
+    const text = decodeURIComponent(m[3]);
+    const bytes = new Uint8Array(text.length);
+    for (let i = 0; i < text.length; i++) bytes[i] = text.charCodeAt(i);
+    return { mime: m[1] || 'text/plain', bytes };
+  }
+  function isDataUrl(str) { return /^data:[^,]*,/.test(str || ''); }
+
   load();
 
   window.KevinOS = window.KevinOS || {};
@@ -278,6 +308,7 @@
     MIME, ext, kind,
     normalize, resolve, list, mkdir, writeFile, readFile, stat,
     remove, rename, copy, move, onChange, usage, reset,
+    bytesToBase64, base64ToBytes, dataUrlFromBytes, bytesFromDataUrl, isDataUrl,
     HOME: '/Home', get root() { return root; }
   };
 })();
