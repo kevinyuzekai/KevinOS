@@ -7,7 +7,7 @@
   const { el } = K.util;
 
   K.registerApp({
-    id: 'paint', name: '画板', icon: 'editor', installable: true,
+    id: 'paint', name: '画板', icon: 'paint', installable: true,
     gradient: ['#6D28D9', '#A78BFA'], category: '创意',
     size: { w: 820, h: 600 },
     mount(win) {

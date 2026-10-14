@@ -18,7 +18,7 @@
   };
 
   K.registerApp({
-    id: 'converter', name: '单位换算', icon: 'calculator', installable: true,
+    id: 'converter', name: '单位换算', icon: 'converter', installable: true,
     gradient: ['#4338CA', '#7C7CF5'], category: '工具',
     size: { w: 560, h: 480 },
     mount(win) {

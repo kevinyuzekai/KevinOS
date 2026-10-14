@@ -11,7 +11,7 @@
   function saveList(l) { localStorage.setItem(STORE_KEY, JSON.stringify(l)); }
 
   K.registerApp({
-    id: 'music', name: '音乐', icon: 'media', installable: true,
+    id: 'music', name: '音乐', icon: 'music', installable: true,
     gradient: ['#BE123C', '#FB7185'], category: '媒体',
     size: { w: 520, h: 640 },
     mount(win) {

@@ -23,7 +23,7 @@
   }
 
   K.registerApp({
-    id: 'reader', name: '阅读器', icon: 'doc', installable: true,
+    id: 'reader', name: '阅读器', icon: 'reader', installable: true,
     gradient: ['#B45309', '#FBBF24'], category: '阅读',
     size: { w: 720, h: 600 },
     mount(win) {

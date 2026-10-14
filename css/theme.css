@@ -1,8 +1,8 @@
 /* ===== KevinOS · Theme tokens & Boot =====
- * 令牌层唯一事实来源：Pixel《设计规范 v2.1》定稿（design/tokens.css，含 --fs-56/--fs-72）。
+ * 令牌层唯一事实来源：Pixel《设计规范 v2.1》定稿（design/tokens.css）。
  * 方向 A 深海（磨砂）为默认材质，方向 B 极光用于深色/可选。
  * data-material 三档：auto（默认，浅色磨砂 / 深色自动极光）/ frost / aurora。
- * data-wall 二档：dark | light —— 桌面图标标签跟随"壁纸明度"，不跟随主题（验收 S1）。
+ * data-wall 二档：dark | light —— 桌面图标标签跟随"壁纸明度"，不跟随主题。
  * 组件里禁止再出现字面量色值、圆角、间距、字号，一律走 var()。
  */
 
@@ -225,6 +225,7 @@
   --size-dock-icon: 48px;
   --size-desk-icon: 48px;
   --size-lp-icon:   72px;
+  --size-fm-icon:   42px;   /* 文件管理器行内图标（介于 sm30 与 desk48 的独立档，图标方案第一阶段定） */
   --size-titlebar-icon: 20px;
   --size-icon:   16px;    /* 行内图标统一 16px */
   --w-sidebar:   216px;
@@ -536,10 +537,6 @@ html:is([data-material="aurora"], [data-theme="dark"][data-material="auto"]) .gl
   /* 窗口轮廓：窗口坐在深色壁纸上时，原来的 1px --border 浅色描边会形成一圈白边。
    * 改成中性内轮廓，深浅壁纸都不刺眼（验收 A8）。 */
   --outline-window: 0 0 0 1px rgba(6, 11, 24, 0.10);
-
-  /* 文件管理器行内图标：介于 sm(30) 与 desk(48) 之间，是独立场景，不硬套现有档。
-   * 待 Pixel 并入 design/tokens.css §10 后可从这里移除。 */
-  --size-fm-icon: 42px;
 }
 
 

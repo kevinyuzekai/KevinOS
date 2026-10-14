@@ -62,7 +62,7 @@
 
     // 档位在创建时传入（不再创建后覆盖 className，否则副形标记会被抹掉）；
     // 尺寸/圆角交给 CSS（.win-titlebar .app-ico.sm = --size-titlebar-icon + --radius-xs）
-    const icoEl = K.apps.appIconEl(app, 'sm');
+    const icoEl = K.apps.appIconEl(app, 'sm', 20);   // 标题栏 20px：副形阈值以下，只渲染主形
 
     const titlebar = el('div', { class: 'win-titlebar' }, [
       el('div', { class: 'win-traffic' }, [

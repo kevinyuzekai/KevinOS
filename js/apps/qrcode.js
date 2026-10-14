@@ -9,7 +9,7 @@
 
   // 简化的 QR Code 生成（使用外部 API 作为后备，纯前端绘制）
   K.registerApp({
-    id: 'qrcode', name: '二维码', icon: 'about', installable: true,
+    id: 'qrcode', name: '二维码', icon: 'qrcode', installable: true,
     gradient: ['#4338CA', '#7C7CF5'], category: '工具',
     size: { w: 480, h: 600 },
     mount(win) {

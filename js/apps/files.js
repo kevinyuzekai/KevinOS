@@ -20,11 +20,12 @@
 
   function fileIcon(node) {
     const span = el('span', { class: 'fmi-ico' });
-    // S3：尺寸/圆角交给 .app-ico.fm（--size-fm-icon + 22%），不再写死 42px / 11px
-    const wrap = el('span', { class: 'app-ico fm' });
+    // S3：尺寸/圆角交给 .app-ico.fm（--size-fm-icon + 22%），不再写死 42px / 11px。
+    // 走 appIconEl 渲染，所以 42px 档（≥28px 阈值）会自动带上双色副形。
+    let icon, gradient;
     if (node.type === 'folder') {
-      wrap.style.background = 'linear-gradient(145deg,#ffc24b,#ff9d2e)';
-      wrap.innerHTML = `<svg viewBox="0 0 24 24">${K.ICONS.files}</svg>`;
+      icon = 'folder';
+      gradient = ['#ffc24b', '#ff9d2e'];                  // §3.14 系统对象色，定稿不动
     } else {
       const kind = FS.kind(node.name);
       // S1：色相跟着"打开它的应用"走（旧色板已废弃）
@@ -38,10 +39,9 @@
         file:  ['file',   '#56648A', '#8A98B8']    // slate 系统对象色
       };
       const [ic, c1, c2] = map[kind] || map.file;
-      wrap.style.background = `linear-gradient(145deg,${c1},${c2})`;
-      wrap.innerHTML = `<svg viewBox="0 0 24 24">${K.ICONS[ic]}</svg>`;
+      icon = ic; gradient = [c1, c2];
     }
-    span.appendChild(wrap);
+    span.appendChild(K.apps.appIconEl({ icon, gradient }, 'fm'));
     return span;
   }
 

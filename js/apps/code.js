@@ -275,7 +275,7 @@
           }
         });
       }
-      function folderIcon() { return el('span', { class: 'cd-fi folder', html: `<svg viewBox="0 0 24 24">${K.ICONS.files}</svg>` }); }
+      function folderIcon() { return el('span', { class: 'cd-fi folder', html: `<svg viewBox="0 0 24 24">${K.ICONS.folder}</svg>` }); }
       function fileIcon(name) {
         const l = langOf(name);
         const cls = l === 'txt' ? 'txt' : l === 'md' ? 'md' : (l === 'json' ? 'json' : 'code');

@@ -53,7 +53,7 @@
   }
 
   K.registerApp({
-    id: 'archive', name: '压缩解压', icon: 'files', installable: true,
+    id: 'archive', name: '压缩解压', icon: 'archive', installable: true,
     gradient: ['#9A3412', '#F97316'], category: '工具',
     size: { w: 640, h: 560 },
     mount(win) {
